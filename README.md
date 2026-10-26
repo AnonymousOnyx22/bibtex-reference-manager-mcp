@@ -4,7 +4,7 @@
 [![downloads](https://img.shields.io/npm/dm/bibtex-reference-manager-mcp.svg)](https://www.npmjs.com/package/bibtex-reference-manager-mcp)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-BibTeX Reference Manager MCP is a free, open source [MCP](https://modelcontextprotocol.io) server, published on npm as `bibtex-reference-manager-mcp`. It cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists, so you stop fixing broken `.bib` files by hand. Paste a list into your AI app and ask it to read the entries, convert them to another format, find the duplicates, flag the problems or give every entry a tidy cite key.
+BibTeX Reference Manager MCP is a bibtex reference manager mcp server, published on npm as `bibtex-reference-manager-mcp`. It cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists, so you stop fixing broken `.bib` files by hand. Paste a list into the chat and ask it to read the entries, convert them to another format, find the duplicates, flag the problems or give every entry a tidy cite key.
 
 It is made with students in mind. Writing a thesis in LaTeX? Ask it to fix a broken `.bib` file, clean up a Zotero export or a Mendeley export, turn an EndNote RIS file into BibTeX, and tidy your thesis bibliography before you hand it in.
 

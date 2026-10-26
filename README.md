@@ -6,7 +6,7 @@
 
 BibTeX Reference Manager MCP is a free, open source [MCP](https://modelcontextprotocol.io) server, published on npm as `bibtex-reference-manager-mcp`. It cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists, so you stop fixing broken `.bib` files by hand. Paste a list into your AI app and ask it to read the entries, convert them to another format, find the duplicates, flag the problems or give every entry a tidy cite key.
 
-Use it with Claude, ChatGPT, Cursor, VS Code Copilot and any other app that supports MCP. It runs on your computer, needs no internet and no login, and your references never leave your machine.
+Use it with Claude Desktop, Claude Code, Cursor, VS Code Copilot and any other app that supports MCP. It runs on your computer, needs no internet and no login, and your references never leave your machine.
 
 Free forever. No account and no subscription.
 
@@ -22,7 +22,6 @@ Add it to your AI app's MCP config so the app can start it for you:
 
 - [Claude Desktop](#claude-desktop)
 - [Claude Code](#claude-code)
-- [ChatGPT](#chatgpt)
 - [Cursor](#cursor)
 - [VS Code Copilot](#vs-code-copilot)
 
@@ -52,20 +51,6 @@ Run this in a terminal:
 ```bash
 claude mcp add bibtex -- npx -y bibtex-reference-manager-mcp
 ```
-
-### ChatGPT
-
-The ChatGPT desktop app can start a server that runs on your computer. Open Settings, choose MCP servers, add a server, pick STDIO and give it the command `npx` with the arguments `-y bibtex-reference-manager-mcp`. Save the server and restart the app.
-
-The desktop app, the Codex CLI and the IDE extension read the same config file, `~/.codex/config.toml`, so you can write the server there instead:
-
-```toml
-[mcp_servers.bibtex]
-command = "npx"
-args = ["-y", "bibtex-reference-manager-mcp"]
-```
-
-The ChatGPT website talks to servers over the web, so it needs a public HTTPS address and cannot start a server on your computer.
 
 ### Cursor
 

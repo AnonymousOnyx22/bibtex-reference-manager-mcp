@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- BibTeX and RIS parse errors now name the entry, the field and the line that failed, for example an unclosed brace, an unclosed quote, an entry that is never closed, or a RIS record without a TY line. Before, the parser guessed and returned a damaged entry.
+
 ## 0.1.0
 
 - First release of BibTeX Reference Manager MCP.

@@ -147,6 +147,14 @@ export function parseBibtex(text: string): Entry[] {
   const macros: Record<string, string> = {};
   let i = 0;
   const n = text.length;
+  // The entry being read, so an error can name it and the line it went wrong on.
+  let where = { type: "", key: "", field: "" };
+  const lineAt = (pos: number) => text.slice(0, pos).split("\n").length;
+  const fail = (what: string, pos: number): never => {
+    const field = where.field ? ` in field ${where.field}` : "";
+    const entry = where.key ? `entry ${where.key}` : `@${where.type} entry`;
+    throw new Error(`${what}${field} of ${entry}, line ${lineAt(pos)}.`);
+  };
 
   const skipWs = () => {
     while (i < n && /\s/.test(text[i])) i++;
@@ -155,6 +163,8 @@ export function parseBibtex(text: string): Entry[] {
     let depth = 0;
     const start = i + 1;
     for (; i < n; i++) {
+      // A new entry starting at the front of a line means this value was never closed.
+      if (text[i] === "\n" && /^\n[ \t]*@[A-Za-z]+\s*[{(]/.test(text.slice(i, i + 80))) break;
       if (text[i] === "{") depth++;
       else if (text[i] === "}" && --depth === 0) {
         const out = text.slice(start, i);
@@ -162,7 +172,7 @@ export function parseBibtex(text: string): Entry[] {
         return out;
       }
     }
-    return text.slice(start);
+    return fail("Unclosed brace", start - 1);
   };
   const readQuoted = (): string => {
     let depth = 0;
@@ -176,7 +186,7 @@ export function parseBibtex(text: string): Entry[] {
         return out;
       }
     }
-    return text.slice(start);
+    return fail("Unclosed quote", start - 1);
   };
   const readValue = (): string => {
     let out = "";
@@ -205,6 +215,8 @@ export function parseBibtex(text: string): Entry[] {
     const head = text.slice(i).match(/^\s*([A-Za-z]+)\s*([{(])/);
     if (!head) continue;
     const type = head[1].toLowerCase();
+    const entryLine = lineAt(at);
+    where = { type, key: "", field: "" };
     i += head[0].length;
     const close = head[2] === "{" ? "}" : ")";
 
@@ -233,10 +245,13 @@ export function parseBibtex(text: string): Entry[] {
     const keyM = text.slice(i).match(/^[^,\s{}]*/);
     const key = keyM ? keyM[0] : "";
     i += key.length;
+    where.key = key;
     const fields: Record<string, string> = {};
     for (;;) {
       skipWs();
-      if (i >= n) break;
+      if (i >= n) {
+        throw new Error(`Entry ${key || `@${type}`} starting on line ${entryLine} is never closed. Add a closing "${close}" at the end of it.`);
+      }
       if (text[i] === ",") {
         i++;
         continue;
@@ -254,7 +269,9 @@ export function parseBibtex(text: string): Entry[] {
       skipWs();
       if (text[i] !== "=") continue;
       i++;
-      fields[nameM[0].toLowerCase()] = readValue();
+      where.field = nameM[0].toLowerCase();
+      fields[where.field] = readValue();
+      where.field = "";
     }
     entries.push(normalizeEntry({ type, key, fields }));
   }
@@ -298,10 +315,15 @@ const RIS_OUT: Record<string, string> = {
 export function parseRis(text: string): Entry[] {
   const entries: Entry[] = [];
   let tags: [string, string][] = [];
+  let startLine = 1;
+  let lineNo = 0;
   const flush = () => {
     if (!tags.length) return;
     const get = (...t: string[]) => tags.find(([k]) => t.includes(k))?.[1];
     const all = (...t: string[]) => tags.filter(([k]) => t.includes(k)).map(([, v]) => v);
+    if (!get("TY")) {
+      throw new Error(`The RIS record starting on line ${startLine} has no TY line. Every record must begin with "TY  - " and a type like JOUR.`);
+    }
     const ty = get("TY") ?? "GEN";
     const type = RIS_TYPES[ty] ?? "misc";
     const fields: Record<string, string> = {};
@@ -331,7 +353,9 @@ export function parseRis(text: string): Entry[] {
     tags = [];
   };
   for (const line of text.split(/\r?\n/)) {
+    lineNo++;
     const m = line.match(/^([A-Z][A-Z0-9])\s{2}-\s?(.*)$/);
+    if (m && !tags.length) startLine = lineNo;
     if (!m) {
       // A line that does not start with a tag continues the last value.
       if (tags.length && line.trim()) tags[tags.length - 1][1] += " " + line.trim();
@@ -340,6 +364,7 @@ export function parseRis(text: string): Entry[] {
     if (m[1] === "ER") flush();
     else if (m[1] === "TY" && tags.length) {
       flush();
+      startLine = lineNo;
       tags.push([m[1], m[2].trim()]);
     } else tags.push([m[1], m[2].trim()]);
   }

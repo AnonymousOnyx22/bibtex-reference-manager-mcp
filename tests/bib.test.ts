@@ -2,6 +2,25 @@ import { describe, it, expect } from "vitest";
 import { detectFormat, parseAny, parseBibtex, parseCslJson, parseNames, parseRis, serialize, toBibtex } from "../src/bib.js";
 import { BIBTEX, CSL, RIS } from "./fixtures.js";
 
+describe("parse errors", () => {
+  it("names the entry, field and line of an unclosed brace", () => {
+    const bad = "@article{smith2024deep,\n  author = {Smith, Jane},\n  title = {Deep {Learning},\n  year = {2024},\n@book{b1,\n  title = {X}\n}\n";
+    expect(() => parseBibtex(bad)).toThrow(/Unclosed brace in field title of entry smith2024deep, line 3/);
+  });
+
+  it("names the line of an unclosed quote", () => {
+    expect(() => parseBibtex('@book{k1,\n  title = "Open,\n  year = 2020\n}')).toThrow(/Unclosed quote in field title of entry k1, line 2/);
+  });
+
+  it("names an entry that is never closed", () => {
+    expect(() => parseBibtex("\n@article{a1,\n  year = {2020},\n")).toThrow(/Entry a1 starting on line 2 is never closed/);
+  });
+
+  it("names the line of a RIS record without TY", () => {
+    expect(() => parseRis("TY  - JOUR\nTI  - One\nER  - \n\nTI  - Two\nER  - \n")).toThrow(/starting on line 5 has no TY/);
+  });
+});
+
 describe("format detection", () => {
   it("tells the three formats apart", () => {
     expect(detectFormat(BIBTEX)).toBe("bibtex");

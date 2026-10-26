@@ -1,0 +1,57 @@
+# BibTeX Reference Manager MCP
+
+> A free, open source MCP server that cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists. It runs offline on the user's computer with no account and no API key. npm package: bibtex-reference-manager-mcp. Version 0.1.0.
+
+Use this server when a user pastes or attaches a reference list and wants it read, converted, deduplicated, checked or renamed. Pass the list as the `text` argument. The tools do the work in code, so do not rewrite entries by hand when a tool can do it.
+
+## Install
+
+Command: `npx -y bibtex-reference-manager-mcp`
+
+MCP config for Claude Desktop, Cursor and similar apps:
+
+```json
+{
+  "mcpServers": {
+    "bibtex": {
+      "command": "npx",
+      "args": ["-y", "bibtex-reference-manager-mcp"]
+    }
+  }
+}
+```
+
+Needs Node.js 20 or newer.
+
+## Tools
+
+All tools are read only, work offline and take `text` (the reference list). Most take an optional `format` of auto, bibtex, ris or csl_json. The default, auto, looks at the text.
+
+- parse_bibliography: returns normalized entries (key, type, authors as "Family, Given", and all fields). Field names are lower case, DOIs are bare, and the year is filled in from a date when needed.
+- convert_bibliography: takes `to` (bibtex, ris, csl_json or text) and optional `from`. Returns the converted list in `output`. BibTeX page ranges are written as 12--15.
+- dedupe_entries: finds duplicate groups by DOI, same cite key (ignoring case) and title similarity. Optional `title_threshold` from 0.5 to 1, default 0.9. Titles are not matched when both entries have a year and the years differ. Each group gives `keep` (the entry with the most fields) and `remove`. Also returns `deduplicated_bibtex`.
+- lint_entries: returns issues with `key`, `rule`, `severity`, `field` and `message`. Rules: missing-field, bad-pages, uncapitalized-title, invalid-doi, bad-year, duplicate-key.
+- generate_cite_keys: returns old and new keys and `bibtex` with the new keys. Keys look like smith2024deep. Set `include_title_word` to false for smith2024. Repeated keys get a letter, like smith2024deepa.
+
+## Example prompts
+
+- "Lint this .bib file and list what to fix."
+- "Remove the duplicate references and give me the clean BibTeX."
+- "Convert this RIS export to BibTeX and rename the keys."
+- "Turn this CSL JSON into a plain text reference list."
+
+## FAQ
+
+Does it look up DOIs online? No. It checks only that a DOI has the shape 10.xxxx/something.
+
+Does it send data anywhere? No. It makes no network requests and keeps nothing between calls.
+
+What happens with an empty list or text it cannot place? The tool returns an error that says so, and asks for the format to be passed.
+
+Which entry types are checked for required fields? article, book, inproceedings, incollection, phdthesis, mastersthesis, techreport, unpublished, misc and online. Other types need a title.
+
+## Links
+
+- Source: https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp
+- npm: https://www.npmjs.com/package/bibtex-reference-manager-mcp
+- License: MIT

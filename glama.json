@@ -1,0 +1,23 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "bibtex-reference-manager-mcp",
+  "description": "BibTeX reference manager MCP server for AI apps. Parse, convert, dedupe and lint BibTeX, RIS and CSL JSON reference lists and make cite keys. Works offline, no account.",
+  "type": "stdio",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp",
+    "source": "github"
+  },
+  "homepage": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp",
+  "version": "0.1.0",
+  "maintainers": [
+    "AnonymousOnyx22"
+  ],
+  "tools": [
+    { "name": "parse_bibliography", "description": "Read BibTeX, RIS or CSL JSON text and return normalized entries." },
+    { "name": "convert_bibliography", "description": "Convert between BibTeX, RIS, CSL JSON and plain text." },
+    { "name": "dedupe_entries", "description": "Find duplicate references by DOI, title similarity and cite key." },
+    { "name": "lint_entries", "description": "Flag missing fields, bad page ranges, uncapitalized titles and invalid DOIs." },
+    { "name": "generate_cite_keys", "description": "Create consistent cite keys like smith2024deep." }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.AnonymousOnyx22/bibtex-reference-manager-mcp",
+  "description": "BibTeX reference manager MCP server. Parse, convert, dedupe and lint BibTeX, RIS and CSL JSON, and make cite keys.",
+  "repository": {
+    "url": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "bibtex-reference-manager-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

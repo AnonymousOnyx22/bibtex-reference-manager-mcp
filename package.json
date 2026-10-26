@@ -1,0 +1,91 @@
+{
+  "name": "bibtex-reference-manager-mcp",
+  "version": "0.1.0",
+  "description": "BibTeX reference manager MCP server for AI apps. Ask your AI to parse, clean, convert, dedupe, lint and format BibTeX, RIS and CSL JSON reference lists, and to make consistent cite keys. Works offline with no account.",
+  "type": "module",
+  "main": "build/src/index.js",
+  "bin": {
+    "bibtex-reference-manager-mcp": "build/src/index.js"
+  },
+  "files": [
+    "build/src",
+    "README.md",
+    "llms.txt",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^22.12.0 || ^24.0.0 || >=26.0.0"
+    }
+  },
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/src/index.js', 0o755)\"",
+    "test": "vitest run",
+    "start": "node build/src/index.js",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "bibtex",
+    "bibtex reference manager",
+    "bibtex cleaner",
+    "bibtex converter",
+    "bib file",
+    "ris",
+    "ris converter",
+    "csl json",
+    "citation",
+    "citations",
+    "references",
+    "bibliography",
+    "reference manager",
+    "cite key",
+    "citation key",
+    "dedupe references",
+    "duplicate references",
+    "doi",
+    "doi validator",
+    "latex",
+    "zotero",
+    "endnote",
+    "mendeley",
+    "academic writing",
+    "thesis",
+    "mcp",
+    "mcp server",
+    "mcp-server",
+    "model-context-protocol",
+    "bibtex-reference-manager-mcp",
+    "student",
+    "students",
+    "university",
+    "education",
+    "claude",
+    "chatgpt",
+    "cursor"
+  ],
+  "author": "AnonymousOnyx22",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp.git"
+  },
+  "homepage": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp/issues"
+  },
+  "mcpName": "io.github.AnonymousOnyx22/bibtex-reference-manager-mcp",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

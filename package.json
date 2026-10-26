@@ -1,7 +1,7 @@
 {
   "name": "bibtex-reference-manager-mcp",
   "version": "0.1.0",
-  "description": "bibtex reference manager mcp server on npm as bibtex-reference-manager-mcp. Cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists. Fix a broken .bib file, clean a Zotero export or Mendeley export, convert EndNote RIS to BibTeX, remove duplicates, check DOIs and make consistent cite keys for a thesis bibliography. Also reads CSL JSON. Works offline with no account.",
+  "description": "BibTeX reference manager MCP server for students writing LaTeX theses and papers. Ask your AI app to fix a broken .bib file, clean a Zotero export or Mendeley export, convert EndNote RIS to BibTeX, remove duplicates, check DOIs and make consistent cite keys for your thesis bibliography. Also reads CSL JSON. Works offline with no account.",
   "type": "module",
   "main": "build/src/index.js",
   "bin": {
@@ -30,7 +30,6 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
-    "bibtex reference manager mcp",
     "bibtex",
     "bibtex reference manager",
     "bibtex cleaner",
@@ -70,7 +69,8 @@
     "student",
     "university",
     "claude",
-    "cursor"
+    "cursor",
+    "bibtex reference manager mcp"
   ],
   "author": "AnonymousOnyx22",
   "license": "MIT",

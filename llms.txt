@@ -1,6 +1,6 @@
 # BibTeX Reference Manager MCP
 
-> A bibtex reference manager mcp server: a free, open source MCP server that cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists. It runs offline on the user's computer with no account and no API key. npm package: bibtex-reference-manager-mcp. Version 0.1.0.
+> A free, open source MCP server that cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists. It runs offline on the user's computer with no account and no API key. npm package: bibtex-reference-manager-mcp. Version 0.1.0.
 
 Use this server when a user pastes or attaches a reference list and wants it read, converted, deduplicated, checked or renamed. Pass the list as the `text` argument. The tools do the work in code, so do not rewrite entries by hand when a tool can do it.
 

@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-- Rewrote the package description, npm keywords, server.json description, README intro and llms.txt around the phrase bibtex reference manager mcp so the server ranks higher in npm search.
-
 - The README and llms.txt now have a Why this server section and steps for exporting a Zotero or Mendeley library to .bib or RIS and pasting it in.
 
 - The README intro, the npm description and the npm keywords now use the words students search for, such as LaTeX, Zotero export, Mendeley export, EndNote RIS, thesis bibliography and fix .bib file.

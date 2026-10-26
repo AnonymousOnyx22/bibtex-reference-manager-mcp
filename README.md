@@ -6,6 +6,8 @@
 
 BibTeX Reference Manager MCP is a free, open source [MCP](https://modelcontextprotocol.io) server, published on npm as `bibtex-reference-manager-mcp`. It cleans, converts, dedupes and formats BibTeX, RIS and CSL JSON reference lists, so you stop fixing broken `.bib` files by hand. Paste a list into your AI app and ask it to read the entries, convert them to another format, find the duplicates, flag the problems or give every entry a tidy cite key.
 
+It is made with students in mind. Writing a thesis in LaTeX? Ask it to fix a broken `.bib` file, clean up a Zotero export or a Mendeley export, turn an EndNote RIS file into BibTeX, and tidy your thesis bibliography before you hand it in.
+
 Use it with Claude Desktop, Claude Code, Cursor, VS Code Copilot and any other app that supports MCP. It runs on your computer, needs no internet and no login, and your references never leave your machine.
 
 Free forever. No account and no subscription.

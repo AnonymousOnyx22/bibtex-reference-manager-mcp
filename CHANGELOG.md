@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The README and llms.txt now have a Why this server section and steps for exporting a Zotero or Mendeley library to .bib or RIS and pasting it in.
+
 - The README intro, the npm description and the npm keywords now use the words students search for, such as LaTeX, Zotero export, Mendeley export, EndNote RIS, thesis bibliography and fix .bib file.
 
 - BibTeX and RIS parse errors now name the entry, the field and the line that failed, for example an unclosed brace, an unclosed quote, an entry that is never closed, or a RIS record without a TY line. Before, the parser guessed and returned a damaged entry.

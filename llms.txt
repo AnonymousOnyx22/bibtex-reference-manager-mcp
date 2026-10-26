@@ -23,6 +23,17 @@ MCP config for Claude Desktop, Cursor and similar apps:
 
 Needs Node.js 20 or newer.
 
+## Why this server
+
+It works on pasted text, not on a live library. It needs no account, API key or internet, and sends nothing anywhere. It does not connect to Zotero or Mendeley; the user exports a file and pastes it in, so any reference manager that writes BibTeX, RIS or CSL JSON works. The work is done by code, so results are the same each time. All tools are read only.
+
+## Exporting from Zotero or Mendeley
+
+1. In Zotero, right click a collection or select items, choose the export option and pick BibTeX or RIS. In Mendeley, select references, choose Export and pick BibTeX or RIS.
+2. Copy the contents of the saved .bib or .ris file, or attach the file.
+3. Pass it as the `text` argument. The format is detected, or pass `format`.
+4. Return the result to the user. To get it back into their reference manager, they save it as .bib or .ris and import it.
+
 ## Tools
 
 All tools are read only, work offline and take `text` (the reference list). Most take an optional `format` of auto, bibtex, ris or csl_json. The default, auto, looks at the text.

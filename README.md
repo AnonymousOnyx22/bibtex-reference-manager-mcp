@@ -94,6 +94,26 @@ Paste your reference list into the chat first, or attach the file, then ask:
 2. "Find the duplicates in this list and give me back a clean BibTeX file without them."
 3. "Convert these RIS entries from my library export to BibTeX, then rename the keys so they look like smith2024deep."
 
+## Why this server
+
+Some MCP servers connect to a reference manager account and read your library online. This one does not. It works on text you paste in, so it is a different tool for a different job.
+
+- It needs no account, no API key and no internet. Nothing is sent anywhere.
+- It does not connect to Zotero or Mendeley. You export a file and paste it in, so it works with any reference manager that can write BibTeX, RIS or CSL JSON.
+- The work is done by code, not by the AI guessing. Converting, deduping, linting and renaming keys give the same result every time.
+- It is read only. It never edits your library or your files. You get the result back and decide what to keep.
+
+If you want an assistant to search or change a live online library, you need a server that connects to that service. This one is for cleaning up an exported list.
+
+## Export from Zotero or Mendeley
+
+1. In Zotero, right click a collection (or select some items), choose the export option and pick BibTeX or RIS. In Mendeley, select your references, choose Export and pick BibTeX or RIS. Menu names change between versions, so look for Export.
+2. Open the saved `.bib` or `.ris` file in any text editor and copy everything, or attach the file in an app that accepts attachments.
+3. Paste it into your AI app and ask, for example: "Lint this list, remove the duplicates and give me back clean BibTeX with tidy cite keys."
+4. Copy the result into your `.bib` file. To get it back into your reference manager, save it as a `.bib` or `.ris` file and import it.
+
+The format is detected for you. If a file is not recognized, say which format it is.
+
 ## Tools
 
 | Tool | What it does |

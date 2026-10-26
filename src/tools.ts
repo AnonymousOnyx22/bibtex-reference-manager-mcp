@@ -34,7 +34,7 @@ const parseBibliography: ToolDef<null> = {
   name: "parse_bibliography",
   title: "Parse a bibliography",
   description:
-    "Read BibTeX, RIS or CSL JSON text and return the entries in one normalized shape: lower case field names, tidy whitespace, bare DOIs, the year filled in from a date, and authors split into \"Family, Given\". Nothing is sent anywhere.",
+    "Read BibTeX, RIS or CSL JSON text and return the entries in one normalized shape: lower case field names, tidy whitespace, bare DOIs, the year filled in from a date, and authors split into \"Family, Given\". Nothing is sent anywhere. Example: text \"@article{k1, AUTHOR = {John Smith and Jane Doe}, title={Deep Learning for Graphs}, year={2024}}\" returns one entry with authors [\"Smith, John\", \"Doe, Jane\"] and lower case field names. Leave format out unless auto picks the wrong one.",
   inputSchema: { text, format },
   outputSchema: {
     format: z.string().describe("The format that was read: bibtex, ris or csl_json."),
@@ -55,7 +55,7 @@ const convertBibliography: ToolDef<null> = {
   name: "convert_bibliography",
   title: "Convert a bibliography",
   description:
-    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple author, year, title style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way.",
+    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple author, year, title style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way. Example: text is a BibTeX entry and to is \"ris\", and output is the same reference as RIS. Set from only to override detection.",
   inputSchema: {
     text,
     to: z.enum(["bibtex", "ris", "csl_json", "text"]).describe("The format to write."),
@@ -82,7 +82,7 @@ const dedupeEntries: ToolDef<null> = {
   name: "dedupe_entries",
   title: "Find duplicate entries",
   description:
-    "Find duplicate references by matching DOI, by the same cite key, and by similar titles (the years must not clash). Each group says which entry to keep, the one with the most fields, and which to remove. Also returns the list as BibTeX with the extra copies dropped.",
+    "Find duplicate references by matching DOI, by the same cite key, and by similar titles (the years must not clash). Each group says which entry to keep, the one with the most fields, and which to remove. Also returns the list as BibTeX with the extra copies dropped. Example: two entries with the same DOI, one with 3 fields and one with 6, give one group that keeps the entry with 6 fields and lists the other under remove. Your files are not changed.",
   inputSchema: {
     text,
     format,
@@ -131,7 +131,7 @@ const lintEntriesTool: ToolDef<null> = {
   name: "lint_entries",
   title: "Lint entries",
   description:
-    "Check a reference list for problems: missing required fields for the entry type, bad page ranges, titles that are not capitalized, invalid DOIs, odd years and repeated keys. Each issue names the entry key, the field and a plain message.",
+    "Check a reference list for problems: missing required fields for the entry type, bad page ranges, titles that are not capitalized, invalid DOIs, odd years and repeated keys. Each issue names the entry key, the field and a plain message. Example: an @article with no journal field gives an issue with the rule missing-field and the field journal. Pass the whole list as text so repeated keys can be found.",
   inputSchema: { text, format },
   outputSchema: {
     count: z.number().describe("How many entries were checked."),
@@ -164,7 +164,7 @@ const generateCiteKeys: ToolDef<null> = {
   name: "generate_cite_keys",
   title: "Generate cite keys",
   description:
-    "Create consistent cite keys from the first author's family name, the year and the first meaningful word of the title, like smith2024deep. Repeated keys get a letter added. Returns the old and new key for each entry and the list as BibTeX with the new keys.",
+    "Create consistent cite keys from the first author's family name, the year and the first meaningful word of the title, like smith2024deep. Repeated keys get a letter added. Returns the old and new key for each entry and the list as BibTeX with the new keys. Example: an entry with key old1, author \"Smith, John\", year 2024 and title \"Deep Learning for Graphs\" gives old_key old1 and new_key smith2024deep, or smith2024 when include_title_word is false.",
   inputSchema: {
     text,
     format,

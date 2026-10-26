@@ -125,6 +125,29 @@ describe("CSL JSON reader", () => {
   });
 });
 
+describe("edge cases", () => {
+  it("parses nested braces in a BibTeX field", () => {
+    const [e] = parseBibtex(`@article{k, title = {Deep {DNA} {with {nested} braces}}, year = {2024}}`);
+    expect(e.fields.title).toBe("Deep {DNA} {with {nested} braces}");
+  });
+
+  it("expands an @string macro used in multiple entries", () => {
+    const es = parseBibtex(`@string{j = "Journal X"}\n@article{a, title={T}, journal=j, year={2020}}\n@article{b, title={U}, journal=j, year={2021}}`);
+    expect(es[0].fields.journal).toBe("Journal X");
+    expect(es[1].fields.journal).toBe("Journal X");
+  });
+
+  it("joins multi line RIS field values", () => {
+    const [e] = parseRis(`TY  - JOUR\nTI  - A title that\n  continues on next line\nPY  - 2022\nER  - \n`);
+    expect(e.fields.title).toBe("A title that continues on next line");
+  });
+
+  it("turns accented author names into ascii cite keys", () => {
+    const { entries } = parseAny(`@article{, author = {Müller, José}, title = {T}, year = {2024}}`);
+    expect(entries[0].key).toBe("muller2024t");
+  });
+});
+
 describe("writers", () => {
   const { entries } = parseAny(BIBTEX);
 

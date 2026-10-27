@@ -28,14 +28,6 @@ Paste your reference list into the chat first, or attach the file, then ask:
 2. "Find the duplicates in this list and give me back a clean BibTeX file without them."
 3. "Convert these RIS entries from my library export to BibTeX, then rename the keys so they look like smith2024deep."
 
-## Install
-
-Run it straight from npm with `npx`. You need Node.js 20 or newer, see [Node version](#node-version) for the details. There is nothing else to install, no account, no API key and no config file for the server itself.
-
-```bash
-npx -y bibtex-reference-manager-mcp
-```
-
 Add it to your AI app's MCP config so the app can start it for you:
 
 - [Claude Desktop](#claude-desktop)

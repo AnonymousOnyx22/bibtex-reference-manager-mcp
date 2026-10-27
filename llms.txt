@@ -36,20 +36,154 @@ It works on pasted text, not on a live library. It needs no account, API key or 
 
 ## Tools
 
-All tools are read only, work offline and take `text` (the reference list). Most take an optional `format` of auto, bibtex, ris or csl_json. The default, auto, looks at the text.
+All tools are read only, work offline and take `text` (the reference list). Most take an optional `format` of auto, bibtex, ris or csl_json. The default, auto, looks at the text. Every tool returns both a readable answer and structured fields.
 
-- parse_bibliography: returns normalized entries (key, type, authors as "Family, Given", and all fields). Field names are lower case, DOIs are bare, and the year is filled in from a date when needed.
-- convert_bibliography: takes `to` (bibtex, ris, csl_json or text) and optional `from`. Returns the converted list in `output`. BibTeX page ranges are written as 12--15.
-- dedupe_entries: finds duplicate groups by DOI, same cite key (ignoring case) and title similarity. Optional `title_threshold` from 0.5 to 1, default 0.9. Titles are not matched when both entries have a year and the years differ. Each group gives `keep` (the entry with the most fields) and `remove`. Also returns `deduplicated_bibtex`.
-- lint_entries: returns issues with `key`, `rule`, `severity`, `field` and `message`. Rules: missing-field, bad-pages, uncapitalized-title, invalid-doi, bad-year, duplicate-key.
-- generate_cite_keys: returns old and new keys and `bibtex` with the new keys. Keys look like smith2024deep. Set `include_title_word` to false for smith2024. Repeated keys get a letter, like smith2024deepa.
+### parse_bibliography
+Read BibTeX, RIS or CSL JSON text and return the entries in one normalized shape: lower case field names, tidy whitespace, bare DOIs, the year filled in from a date, and authors split into "Family, Given".
+
+Inputs:
+- text (required): the reference list
+- format (optional): auto, bibtex, ris, or csl_json
+
+Example input (BibTeX):
+```bibtex
+@article{smith2024,
+  AUTHOR = {John Smith and Jane Doe},
+  title={Deep Learning for Graphs},
+  year={2024},
+  doi = {https://doi.org/10.1000/abc123},
+  journal = {J Graph Learn}
+}
+```
+
+Example result:
+- format: bibtex
+- count: 1
+- entries[0].authors: ["Smith, John", "Doe, Jane"]
+- entries[0].fields.doi: "10.1000/abc123"
+- entries[0].fields.year: "2024"
+
+Notes: leave format out unless auto picks the wrong one. If the text cannot be read, the tool returns an error asking for the format to be passed.
+
+### convert_bibliography
+Convert between BibTeX, RIS, CSL JSON and plain text (a simple author, year, title style). Input format is detected unless passed. Page ranges become 12--15 in BibTeX. DOIs and names are cleaned on the way.
+
+Inputs:
+- text (required): the reference list
+- to (required): bibtex, ris, csl_json, or text
+- from (optional): auto, bibtex, ris, or csl_json
+
+Example 1: BibTeX to RIS
+Input text is BibTeX. to: "ris". Output contains RIS tags like TY, AU, TI, PY, DO and ER  - .
+
+Example 2: RIS to BibTeX
+RIS entries convert to BibTeX. Page ranges like 100-112 become pages = {100--112}.
+
+Example 3: CSL JSON to plain text
+Produces lines like "Garcia, L., & World Health Organization. (2022). Remote learning outcomes."
+
+Example 4: BibTeX to CSL JSON
+Returns a JSON array of items.
+
+If there are no entries, the tool returns an error that says so.
+
+### dedupe_entries
+Find duplicate references by matching DOI, by the same cite key, and by similar titles (years must not clash). For each group it says which entry to keep (the one with the most fields) and which to remove. Also returns the list as BibTeX with the extra copies dropped.
+
+Inputs:
+- text (required): the reference list
+- format (optional): auto, bibtex, ris, or csl_json
+- title_threshold (optional): 0.5 to 1, default 0.9
+
+How matching works:
+- DOI match: normalizes DOI (strips https://doi.org/) and matches case insensitively
+- key match: matches cite keys ignoring case
+- title match: lowercases, drops punctuation and accents, compares pairs of letters. Two entries with different years are not matched by title
+
+Example: two entries with the same DOI, one with 3 fields and one with 6. The group keeps the entry with 6 fields and lists the other under remove. The deduplicated_bibtex omits the removed copy.
+
+If loose titles should match, lower title_threshold (e.g. 0.8). If there are no duplicates, the tool reports no duplicates found and returns the full list.
+
+### lint_entries
+Check a reference list for problems. Each issue gives key, rule, severity, field (if any), and message.
+
+Inputs:
+- text (required): the reference list
+- format (optional): auto, bibtex, ris, or csl_json
+
+Rules:
+- missing-field: required fields missing for the entry type. Checked types: article, book, inproceedings, incollection, phdthesis, mastersthesis, techreport, unpublished, misc, online. Other types need a title. For example @article needs journal; @book needs author.
+- bad-pages: page ranges that run backwards, use one hyphen, or are not numbers. Use double hyphen for ranges.
+- uncapitalized-title: titles that start with a lower case letter (protected capitals in {DNA} are allowed)
+- invalid-doi: DOI does not look like 10.xxxx/something (DOIs are not looked up online)
+- bad-year: year is not a normal year value
+- duplicate-key: the same cite key appears more than once
+
+Example issues:
+- bad1: missing-field on journal (error)
+- bad1: uncapitalized-title (warning)
+- bad1: invalid-doi (warning)
+- bad1: bad-year (warning)
+- bad2: bad-pages because single hyphen (warning)
+- bad3: missing-field on author and bad-pages (errors/warnings)
+- dup: duplicate-key (error)
+
+Pass the whole list so repeated keys can be found. A clean list returns no problems found.
+
+### generate_cite_keys
+Create consistent cite keys from the first author's family name, the year, and the first meaningful word of the title. Repeated keys get a letter added.
+
+Inputs:
+- text (required): the reference list
+- format (optional): auto, bibtex, ris, or csl_json
+- include_title_word (optional): add the first meaningful title word (default true)
+
+Behavior:
+- Uses first author's family name, normalized (accents removed)
+- Uses year if present
+- If include_title_word is true, uses first meaningful title word
+- If no author, uses anon plus year and title word
+- Repeats get a letter: smith2024, smith2024a, smith2024b
+- Returns old and new keys for each entry and the list as BibTeX with new keys
+
+Examples:
+- Smith, John, 2024, "Deep learning for sequencing" -> smith2024deep
+- Same author/year/title start -> smith2024deepa
+- Muller with umlaut -> muller2019art
+- No author -> keys based on anon and title
+
+## Workflows
+
+### Clean up a Zotero or Mendeley export
+1. Export from Zotero or Mendeley as BibTeX or RIS
+2. Pass to lint_entries to find problems
+3. Pass to dedupe_entries to remove duplicates
+4. Pass to generate_cite_keys to make consistent keys
+5. Use convert_bibliography if the target format differs
+
+Example sequence with text from an export:
+- lint_entries on the raw list shows missing fields and bad page ranges
+- dedupe_entries returns deduplicated_bibtex with duplicates removed
+- generate_cite_keys on the cleaned list returns bibtex with new keys
+
+### Convert between formats
+1. parse_bibliography to inspect normalized entries
+2. convert_bibliography with to set to target format (bibtex, ris, csl_json, or text)
+3. Page ranges become 12--15 in BibTeX. Protected capitals in braces are kept in BibTeX output
+
+### Check before submitting
+1. Run lint_entries to catch missing required fields, bad pages, bad DOIs, bad years, repeated keys
+2. Fix issues in the source or regenerate
+3. Run dedupe_entries to ensure no duplicates remain
+4. Optionally rename keys with generate_cite_keys
 
 ## Example prompts
-
 - "Lint this .bib file and list what to fix."
 - "Remove the duplicate references and give me the clean BibTeX."
 - "Convert this RIS export to BibTeX and rename the keys."
 - "Turn this CSL JSON into a plain text reference list."
+- "Parse this list and show me normalized authors and DOIs."
+- "Deduplicate this mixed list using a looser title match."
 
 ## FAQ
 
@@ -60,6 +194,10 @@ Does it send data anywhere? No. It makes no network requests and keeps nothing b
 What happens with an empty list or text it cannot place? The tool returns an error that says so, and asks for the format to be passed.
 
 Which entry types are checked for required fields? article, book, inproceedings, incollection, phdthesis, mastersthesis, techreport, unpublished, misc and online. Other types need a title.
+
+Will it change my protected capitals like {DNA}? No. Braces are kept in BibTeX output and only removed when you convert to RIS, CSL JSON or plain text.
+
+How does it decide two titles are the same? It lowercases the titles, drops punctuation and accents, and compares pairs of letters. The default match is 0.9 out of 1. Pass title_threshold to loosen or tighten that. Two entries with different years are not matched by title.
 
 ## Links
 

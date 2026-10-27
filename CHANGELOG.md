@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The README now has a Common workflows section showing how the five tools work together in a typical thesis or cleaning workflow.
+
 - The README now has a competitor comparison table showing how it differs from servers that connect to online accounts or web APIs.
 
 - The README and llms.txt now have a Why this server section and steps for exporting a Zotero or Mendeley library to .bib or RIS and pasting it in.

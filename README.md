@@ -152,6 +152,30 @@ Every tool takes the reference list as `text`, and every tool returns both a rea
 - RIS: the usual tags such as `TY`, `AU`, `TI`, `T2`, `PY`, `SP`, `EP`, `DO` and `KW`.
 - CSL JSON: a list of items, one item, or an object with an `items` list.
 
+## Common workflows
+
+These show how the five tools fit together. All of them take the reference list as `text` and are read only.
+
+### Clean a Zotero or Mendeley export
+
+1. Run `parse_bibliography` to normalize the entries and fill in missing years.
+2. Run `dedupe_entries` to remove duplicates by DOI, cite key or title.
+3. Run `lint_entries` to see missing fields, bad page ranges and odd years.
+4. Run `generate_cite_keys` to give every entry a tidy key like `smith2024deep`.
+5. Run `convert_bibliography` to get back a clean BibTeX file.
+
+### Turn an EndNote RIS export into BibTeX
+
+1. Run `parse_bibliography` on the RIS text to check it parses.
+2. Run `convert_bibliography` with `to` set to BibTeX.
+3. Run `generate_cite_keys` if you want keys like `smith2024deep`.
+
+### Check a finished .bib before you hand it in
+
+1. Run `parse_bibliography` to normalize.
+2. Run `lint_entries` and fix what it flags.
+3. Run `dedupe_entries` to make sure nothing is listed twice.
+
 ## Privacy
 
 Everything runs on your computer. The server reads only the text your AI app passes to it. It makes no network requests, does not look up DOIs online, needs no API key and keeps nothing between calls. DOI checks only look at the shape of the DOI, they do not ask a website whether it exists.

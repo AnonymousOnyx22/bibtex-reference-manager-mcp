@@ -6,6 +6,8 @@
     "url": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp",
     "source": "github"
   },
+  "license": "MIT",
+  "homepage": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp#readme",
   "version": "0.1.0",
   "packages": [
     {

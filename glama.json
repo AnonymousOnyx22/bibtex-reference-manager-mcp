@@ -14,10 +14,25 @@
     "AnonymousOnyx22"
   ],
   "tools": [
-    { "name": "parse_bibliography", "description": "Read BibTeX, RIS or CSL JSON text and return normalized entries." },
-    { "name": "convert_bibliography", "description": "Convert between BibTeX, RIS, CSL JSON and plain text." },
-    { "name": "dedupe_entries", "description": "Find duplicate references by DOI, title similarity and cite key." },
-    { "name": "lint_entries", "description": "Flag missing fields, bad page ranges, uncapitalized titles and invalid DOIs." },
-    { "name": "generate_cite_keys", "description": "Create consistent cite keys like smith2024deep." }
+    {
+      "name": "parse_bibliography",
+      "description": "Read BibTeX, RIS or CSL JSON text and return normalized entries. Example: parse a BibTeX article and get authors as \"Family, Given\" with lower case fields."
+    },
+    {
+      "name": "convert_bibliography",
+      "description": "Convert between BibTeX, RIS, CSL JSON and plain text. Example: convert BibTeX to RIS while cleaning page ranges and DOIs."
+    },
+    {
+      "name": "dedupe_entries",
+      "description": "Find duplicate references by DOI, title similarity and cite key. Example: two entries with same DOI keep the one with more fields and drop the other."
+    },
+    {
+      "name": "lint_entries",
+      "description": "Flag missing fields, bad page ranges, uncapitalized titles and invalid DOIs. Example: an article missing journal returns a missing-field issue."
+    },
+    {
+      "name": "generate_cite_keys",
+      "description": "Create consistent cite keys like smith2024deep. Example: Smith 2024 \"Deep Learning\" becomes smith2024deep with repeated keys getting letters."
+    }
   ]
 }

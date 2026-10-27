@@ -105,6 +105,26 @@ Some MCP servers connect to a reference manager account and read your library on
 
 If you want an assistant to search or change a live online library, you need a server that connects to that service. This one is for cleaning up an exported list.
 
+## Competitor comparison
+
+Other MCP servers work with reference libraries too. Most connect to an online account or a web API, so your data leaves your computer and you need an account or an API key. This server works on text you paste in, so it needs no account, no API key and no internet, and nothing is sent anywhere.
+
+| Server | Works offline | Needs account or key | Reads a live library | Read only | Formats |
+| --- | --- | --- | --- | --- | --- |
+| BibTeX Reference Manager MCP | Yes | No | No | Yes | BibTeX, RIS, CSL JSON |
+| zotero-mcp | No | Yes | Yes | No | Zotero, BibTeX |
+| mendeley-mcp | No | Yes | Yes | No | Mendeley, BibTeX |
+| bibtex-mcp | No | Optional | No | Yes | BibTeX |
+| reference-mcp | No | No | No | Yes | BibTeX |
+| CrossRef-MCP | No | No | No | Yes | BibTeX |
+| mcp_doi2bib | No | No | No | Yes | BibTeX |
+| Local-Zotero-MCP | No | No | Yes | Yes | Zotero |
+| jabref-mcp | No | No | Yes | No | BibTeX |
+
+zotero-mcp and mendeley-mcp connect to your online Zotero or Mendeley library and can change it. bibtex-mcp, reference-mcp, CrossRef-MCP and mcp_doi2bib fetch citations from web sources such as Semantic Scholar, OpenAlex, CiteAs, Google Scholar and CrossRef. Local-Zotero-MCP reads your local Zotero library through the Zotero desktop app. jabref-mcp reads a JabRef .bib file and can add entries through JabRef.
+
+Pick this server when you want to clean, convert, dedupe, lint and rename an exported list without sending it anywhere. Pick one of the others when you want to search or change a live online library.
+
 ## Export from Zotero or Mendeley
 
 1. In Zotero, right click a collection (or select some items), choose the export option and pick BibTeX or RIS. In Mendeley, select your references, choose Export and pick BibTeX or RIS. Menu names change between versions, so look for Export.

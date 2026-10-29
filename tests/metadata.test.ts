@@ -66,7 +66,9 @@ describe("docs", () => {
   });
 
   it("have no leftovers from the old project", () => {
-    expect(readme.toLowerCase()).not.toMatch(/gpa|brightspace/);
+    // the table of sibling servers names the other servers on purpose, so it is left out of this check
+    const withoutSiblings = readme.replace(/\n## More free student MCP servers[\s\S]*?(?=\n## |$)/, "");
+    expect(withoutSiblings.toLowerCase()).not.toMatch(/gpa|brightspace/);
     expect(llms.toLowerCase()).not.toMatch(/gpa|brightspace/);
     expect(read("CHANGELOG.md").toLowerCase()).not.toMatch(/gpa/);
   });

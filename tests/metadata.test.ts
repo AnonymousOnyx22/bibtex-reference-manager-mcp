@@ -12,7 +12,7 @@ describe("package metadata", () => {
   it("uses the agreed names and version", () => {
     expect(pkg.name).toBe("bibtex-reference-manager-mcp");
     expect(pkg.mcpName).toBe("io.github.AnonymousOnyx22/bibtex-reference-manager-mcp");
-    expect(pkg.version).toBe("0.1.0");
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(pkg.bin).toEqual({ "bibtex-reference-manager-mcp": "build/src/index.js" });
   });
 

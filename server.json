@@ -6,12 +6,12 @@
     "url": "https://github.com/AnonymousOnyx22/bibtex-reference-manager-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "bibtex-reference-manager-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": {
         "type": "stdio"
       }

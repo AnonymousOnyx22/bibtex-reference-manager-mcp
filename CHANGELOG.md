@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
 
 - The README now has a Common workflows section showing how the five tools work together in a typical thesis or cleaning workflow.
 

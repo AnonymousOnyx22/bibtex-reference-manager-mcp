@@ -1,6 +1,6 @@
 {
   "name": "bibtex-reference-manager-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "BibTeX reference manager MCP server for students writing LaTeX theses and papers. Ask your AI app to fix a broken .bib file, clean a Zotero export or Mendeley export, convert EndNote RIS to BibTeX, remove duplicates, check DOIs and make consistent cite keys for your thesis bibliography. Also reads CSL JSON. Works offline with no account.",
   "type": "module",
   "main": "build/src/index.js",

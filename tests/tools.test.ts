@@ -135,6 +135,58 @@ describe("dedupe_entries", () => {
     expect((await call("dedupe_entries", { text: loose })).data.groups).toHaveLength(0);
     expect((await call("dedupe_entries", { text: loose, title_threshold: 0.8 })).data.groups).toHaveLength(1);
   });
+
+  it("finds nothing in text with no entries", async () => {
+    const { data, text } = await call("dedupe_entries", { text: "@comment{nothing}" });
+    expect(data.total).toBe(0);
+    expect(data.groups).toEqual([]);
+    expect(text).toContain("No duplicates found.");
+  });
+
+  it("matches DOIs that differ in prefix, case and spacing", async () => {
+    const text = `@misc{d1, title={One}, doi={doi:10.5555/AbC}}
+@misc{d2, title={Two}, doi={ https://dx.doi.org/10.5555/abc }}`;
+    const { data } = await call("dedupe_entries", { text });
+    expect(data.groups).toHaveLength(1);
+    expect(data.groups[0].reasons).toContain("doi");
+  });
+
+  it("ignores empty DOIs and empty titles", async () => {
+    const text = `@misc{e1, doi={}, title={}}
+@misc{e2, doi={}, title={}}`;
+    expect((await call("dedupe_entries", { text })).data.groups).toEqual([]);
+  });
+
+  it("groups three copies together and removes two", async () => {
+    const text = `@misc{t1, title={Same Title}, year={2020}, doi={10.1/z}}
+@misc{t2, title={Same Title}, year={2020}, doi={10.1/z}, note={n}}
+@misc{t3, title={Same Title}, year={2020}, doi={10.1/z}}`;
+    const { data } = await call("dedupe_entries", { text });
+    expect(data.groups).toHaveLength(1);
+    expect(data.groups[0].keep).toBe("t2");
+    expect(data.groups[0].remove).toHaveLength(2);
+    expect(data.unique).toBe(1);
+  });
+
+  it("matches titles that differ in case, braces and punctuation", async () => {
+    const text = `@misc{p1, title={Using {DNA}: a Guide!}}
+@misc{p2, title={using dna a guide}}`;
+    expect((await call("dedupe_entries", { text })).data.groups).toHaveLength(1);
+  });
+
+  it("returns an empty merged list when merge_duplicates is true and nothing matches", async () => {
+    const { data } = await call("dedupe_entries", { text: BIBTEX, merge_duplicates: true });
+    expect(data.merged).toEqual([]);
+  });
+
+  it("does not add empty fields or change kept values when merging", async () => {
+    const text = `@article{k1, title={Same}, doi={10.1/q}, journal={Kept}, note={}}
+@article{k2, title={Same}, doi={10.1/q}, journal={Other}, note={}}`;
+    const { data } = await call("dedupe_entries", { text, merge_duplicates: true });
+    const keep = data.groups[0].keep;
+    expect(data.merged[0].fields.journal).toBe(keep === "k1" ? "Kept" : "Other");
+    expect(data.merged[0].added_fields).toEqual({});
+  });
 });
 
 describe("lint_entries", () => {
@@ -371,5 +423,48 @@ describe("fix_entries", () => {
     const { data, text } = await call("fix_entries", { text: "@article{ok, author={Roe, R}, title={Fine Title}, journal={J}, year={2020}, pages={1--2}}" });
     expect(data.fixed).toBe(0);
     expect(text).toContain("Nothing needed fixing.");
+  });
+
+  it("returns an error when there are no entries", async () => {
+    const { res, text } = await call("fix_entries", { text: "@comment{nothing}" });
+    expect(res.isError).toBe(true);
+    expect(text).toMatch(/nothing to fix/);
+  });
+
+  it("fixes a doi: prefix and a http link with spaces", async () => {
+    const text = `@misc{f1, title={Fine Title}, doi={doi:10.1000/pre}}
+@misc{f2, title={Fine Title}, doi={ http://dx.doi.org/10.1000/dx }}`;
+    const { data } = await call("fix_entries", { text });
+    expect(data.bibtex).toContain("doi = {10.1000/pre}");
+    expect(data.bibtex).toContain("doi = {10.1000/dx}");
+  });
+
+  it("only touches page ranges with a single hyphen", async () => {
+    const text = `@misc{g1, title={Fine Title}, pages={12-15}}
+@misc{g2, title={Fine Title}, pages={12--15}}
+@misc{g3, title={Fine Title}, pages={e1234}}`;
+    const { data } = await call("fix_entries", { text });
+    expect(data.fixes.map((x: any) => x.key)).toEqual(["g1"]);
+    expect(data.fixes[0].to).toBe("12--15");
+  });
+
+  it("does not change a title with a braced first word or a non ASCII capital", async () => {
+    const text = `@misc{h1, title={{the} Lord of the Rings}}
+@misc{h2, title={Über die Wirkung}}`;
+    const { data } = await call("fix_entries", { text });
+    expect(data.fixes.filter((x: any) => x.field === "title")).toEqual([]);
+  });
+
+  it("leaves an entry with no fields untouched", async () => {
+    const { data } = await call("fix_entries", { text: "@misc{bare}" });
+    expect(data.count).toBe(1);
+    expect(data.fixed).toBe(0);
+    expect(data.protected_titles).toEqual([]);
+  });
+
+  it("finds no page fixes when run on its own output", async () => {
+    const first = await call("fix_entries", { text: messy });
+    const second = await call("fix_entries", { text: first.data.bibtex });
+    expect(second.data.fixes.filter((x: any) => x.field === "pages" || x.field === "doi")).toEqual([]);
   });
 });

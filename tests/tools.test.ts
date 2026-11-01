@@ -275,6 +275,13 @@ describe("generate_cite_keys", () => {
     expect(data.keys[0]).toEqual({ old_key: "old1", new_key: "smith2024deep" });
   });
 
+  it("prints the rekeyed BibTeX in the text only when asked", async () => {
+    const plain = await call("generate_cite_keys", { text: list });
+    expect(plain.text).not.toContain("@article{");
+    const shown = await call("generate_cite_keys", { text: list, show_bibtex: true });
+    expect(shown.text).toContain("@article{smith2024deep,");
+  });
+
   it("uses the family name of a CSL JSON author", async () => {
     const { data } = await call("generate_cite_keys", { text: CSL });
     expect(data.keys[0].new_key).toBe("garcia2022remote");

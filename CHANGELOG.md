@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `generate_cite_keys` takes an optional `show_bibtex`. When true, the text reply also lists the full entries with the new keys, so you can paste them into your .bib file. The existing output is unchanged.
+
 - `convert_bibliography` now accepts `chicago` and `harvard` for `style`, next to `apa`, `mla` and `ieee`. Chicago is the bibliography form with the author first. The existing styles are unchanged.
 
 - `fix_entries` now wraps acronyms like DNA, NASA and iOS in braces, as in `{DNA}`, when it fixes the capitalization of a title, so BibTeX styles keep their case. The new `protected_titles` list shows which words were wrapped. The existing output is unchanged.

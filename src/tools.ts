@@ -236,6 +236,7 @@ const generateCiteKeys: ToolDef<null> = {
     text,
     format,
     include_title_word: z.boolean().optional().describe("Add the first meaningful title word, so you get smith2024deep and not smith2024. Defaults to true."),
+    show_bibtex: z.boolean().optional().describe("Also print the full entries with the new keys in the text reply, ready to paste into a .bib file. Defaults to false."),
   },
   outputSchema: {
     count: z.number(),
@@ -252,9 +253,11 @@ const generateCiteKeys: ToolDef<null> = {
     });
     const renamed = entries.map((e, i) => ({ ...e, key: keys[i].new_key }));
     const lines = keys.map((k) => (k.old_key === k.new_key ? `${k.new_key} (unchanged)` : `${k.old_key} becomes ${k.new_key}`));
+    const bibtex = toBibtex(renamed);
+    const head = `Made ${plural(keys.length, "cite key")}.\n${bullets(lines, "No entries were found.")}`;
     return {
-      text: `Made ${plural(keys.length, "cite key")}.\n${bullets(lines, "No entries were found.")}`,
-      structured: { count: keys.length, keys, bibtex: toBibtex(renamed) },
+      text: a.show_bibtex && keys.length ? `${head}\n\n${bibtex}` : head,
+      structured: { count: keys.length, keys, bibtex },
     };
   },
 };

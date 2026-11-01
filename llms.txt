@@ -152,6 +152,7 @@ Inputs:
 - text (required): the reference list
 - format (optional): auto, bibtex, ris, or csl_json
 - include_title_word (optional): add the first meaningful title word (default true)
+- show_bibtex (optional): also print the full entries with the new keys in the text reply (default false)
 
 Behavior:
 - Uses first author's family name, normalized (accents removed)

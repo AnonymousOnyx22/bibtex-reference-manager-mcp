@@ -184,6 +184,60 @@ describe("lint_entries", () => {
     const ok = `@article{k, author={A, B}, title={Using {DNA} to learn}, journal={J}, year={2020}, doi={https://doi.org/10.1234/ok.1}}`;
     expect((await call("lint_entries", { text: ok })).data.issues).toEqual([]);
   });
+
+  it("flags a missing author on an article but not on a misc", async () => {
+    const text = `@article{na, title={Some Title Here}, journal={J}, year={2020}}
+@misc{nm, title={Class Notes}}`;
+    const { data } = await call("lint_entries", { text });
+    expect(data.issues.filter((i: any) => i.key === "na").map((i: any) => i.field)).toEqual(["author"]);
+    expect(data.issues.filter((i: any) => i.key === "nm")).toEqual([]);
+  });
+
+  it("accepts an editor in place of a book author", async () => {
+    const text = `@book{ed, editor={Poe, Ed}, title={Collected Essays}, publisher={P}, year={2010}}`;
+    expect((await call("lint_entries", { text })).data.issues).toEqual([]);
+  });
+
+  it("accepts a group author in double braces", async () => {
+    const text = `@article{who, author={{World Health Organization}}, title={Sleep Guidance}, journal={J}, year={2020}}`;
+    expect((await call("lint_entries", { text })).data.issues).toEqual([]);
+  });
+
+  it("flags years that are text or too long but not a four digit year", async () => {
+    const text = `@misc{y1, title={A}, year={n.d.}}
+@misc{y2, title={B}, year={20244}}
+@misc{y3, title={C}, year={2020}}`;
+    const { data } = await call("lint_entries", { text });
+    expect(data.issues.filter((i: any) => i.rule === "bad-year").map((i: any) => i.key)).toEqual(["y1", "y2"]);
+  });
+
+  it("treats keys that differ only in case as duplicates", async () => {
+    const text = `@misc{Key, title={A}}
+@misc{key, title={B}}`;
+    const { data } = await call("lint_entries", { text });
+    expect(data.issues.filter((i: any) => i.rule === "duplicate-key")).toHaveLength(1);
+  });
+
+  it("reports a key used three times once with the count", async () => {
+    const text = `@misc{k, title={A}}
+@misc{k, title={B}}
+@misc{k, title={C}}`;
+    const { data } = await call("lint_entries", { text });
+    const dups = data.issues.filter((i: any) => i.rule === "duplicate-key");
+    expect(dups).toHaveLength(1);
+    expect(dups[0].message).toMatch(/3 times/);
+  });
+
+  it("does not flag a title that starts with a non ASCII capital", async () => {
+    const text = `@article{u, author={A, B}, title={Über die Wirkung von Schlaf}, journal={J}, year={2020}}`;
+    const { data } = await call("lint_entries", { text });
+    expect(data.issues.filter((i: any) => i.rule === "uncapitalized-title")).toEqual([]);
+  });
+
+  it("returns no issues when there are no entries", async () => {
+    const { data } = await call("lint_entries", { text: "@comment{nothing}" });
+    expect(data.issues).toEqual([]);
+  });
 });
 
 describe("generate_cite_keys", () => {
@@ -214,6 +268,46 @@ describe("generate_cite_keys", () => {
   it("uses the family name of a CSL JSON author", async () => {
     const { data } = await call("generate_cite_keys", { text: CSL });
     expect(data.keys[0].new_key).toBe("garcia2022remote");
+  });
+
+  it("uses the last word of a group author", async () => {
+    const text = `@article{r, author={{World Health Organization}}, title={Sleep Guidance}, year={2020}}`;
+    const { data } = await call("generate_cite_keys", { text });
+    expect(data.keys[0].new_key).toBe("organization2020sleep");
+  });
+
+  it("falls back to the editor, then to anon", async () => {
+    const text = `@book{b, editor={Poe, Ed}, title={Collected Essays}, year={2010}}
+@misc{m, title={Collected Essays}, year={2010}}`;
+    const { data } = await call("generate_cite_keys", { text });
+    expect(data.keys.map((k: any) => k.new_key)).toEqual(["poe2010collected", "anon2010collected"]);
+  });
+
+  it("strips accents from names and titles", async () => {
+    const text = `@article{a, author={Müller, Jörg}, title={Éléphants et {LaTeX}}, year={2021}}`;
+    const { data } = await call("generate_cite_keys", { text });
+    expect(data.keys[0].new_key).toBe("muller2021elephants");
+  });
+
+  it("skips stop words and uses nd for a bad year", async () => {
+    const text = `@misc{a, author={Lee, A}, title={The Study of Sleep}, year={n.d.}}
+@misc{b, author={Lee, A}, title={The Study of Sleep}}`;
+    const { data } = await call("generate_cite_keys", { text });
+    expect(data.keys.map((k: any) => k.new_key)).toEqual(["leendstudy", "leendstudya"]);
+  });
+
+  it("adds letters to repeated keys when the title word is left off", async () => {
+    const text = `@misc{a, author={Lee, A}, title={One}, year={2020}}
+@misc{b, author={Lee, A}, title={Two}, year={2020}}
+@misc{c, author={Lee, A}, title={Three}, year={2020}}`;
+    const { data } = await call("generate_cite_keys", { text, include_title_word: false });
+    expect(data.keys.map((k: any) => k.new_key)).toEqual(["lee2020", "lee2020a", "lee2020b"]);
+  });
+
+  it("returns no keys when there are no entries", async () => {
+    const { data } = await call("generate_cite_keys", { text: "@comment{nothing}" });
+    expect(data.count).toBe(0);
+    expect(data.keys).toEqual([]);
   });
 });
 

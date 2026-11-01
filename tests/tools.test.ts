@@ -341,6 +341,16 @@ describe("fix_entries", () => {
     expect(data.bibtex).toContain("pages = {50--55}");
   });
 
+  it("wraps acronyms in braces when it fixes a title", async () => {
+    const { data } = await call("fix_entries", {
+      text: "@article{p1, author={Roe, R}, title={using DNA and iOS data from NASA, again}, journal={J}, year={2020}}\n@article{p2, author={Roe, R}, title={Fine DNA Title}, journal={J}, year={2020}}",
+    });
+    const to = data.fixes.find((x: any) => x.key === "p1" && x.field === "title")?.to;
+    expect(to).toBe("Using {DNA} and {iOS} data from {NASA}, again");
+    expect(data.protected_titles).toEqual([{ key: "p1", words: ["DNA", "iOS", "NASA"] }]);
+    expect(data.fixes.find((x: any) => x.key === "p2")).toBeUndefined();
+  });
+
   it("reports nothing to fix for a clean list", async () => {
     const { data, text } = await call("fix_entries", { text: "@article{ok, author={Roe, R}, title={Fine Title}, journal={J}, year={2020}, pages={1--2}}" });
     expect(data.fixed).toBe(0);

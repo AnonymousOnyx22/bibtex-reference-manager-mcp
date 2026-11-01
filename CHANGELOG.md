@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `fix_entries` now wraps acronyms like DNA, NASA and iOS in braces, as in `{DNA}`, when it fixes the capitalization of a title, so BibTeX styles keep their case. The new `protected_titles` list shows which words were wrapped. The existing output is unchanged.
+
 - `dedupe_entries` takes an optional `merge_duplicates`. When true, the result has a `merged` list that shows the fields only the removed copies had (like doi or pages) next to the kept entry. The existing output is unchanged.
 
 - When the format cannot be detected, the error now lists the accepted formats with a small BibTeX, RIS and CSL JSON example, and says so when the text is only a list of DOIs or URLs.

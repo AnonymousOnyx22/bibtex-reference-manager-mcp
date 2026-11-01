@@ -196,23 +196,45 @@ export interface Fix {
   to: string;
 }
 
-function capitalizeTitle(title: string): string {
+// Words like DNA, NASA, iOS or mRNA: BibTeX styles would lower case them without braces.
+const ACRONYM = /^([("'[]*)([A-Z]{2,}s?|[a-z]+[A-Z][A-Za-z]*)([)"'\].,;:!?]*)$/;
+
+function capitalizeTitle(title: string): { title: string; protectedWords: string[] } {
   const raw = title.trim();
-  if (/^[a-z]/.test(raw)) return raw[0].toUpperCase() + raw.slice(1);
+  const protectedWords: string[] = [];
+  const firstOnly = /^[a-z]/.test(raw);
   let depth = 0;
-  return raw
+  let first = true;
+  const out = raw
     .split(/(\s+)/)
     .map((word) => {
       const inBraces = depth > 0 || word.startsWith("{");
       for (const c of word) depth += c === "{" ? 1 : c === "}" ? -1 : 0;
-      if (inBraces || SMALL_WORDS.has(word.toLowerCase())) return word;
+      const isWord = word.trim() !== "";
+      const wasFirst = isWord && first;
+      if (isWord) first = false;
+      if (inBraces) return word;
+      const m = ACRONYM.exec(word);
+      if (m) {
+        protectedWords.push(m[2]);
+        return `${m[1]}{${m[2]}}${m[3]}`;
+      }
+      if (firstOnly) return wasFirst ? word.replace(/^[a-z]/, (c) => c.toUpperCase()) : word;
+      if (SMALL_WORDS.has(word.toLowerCase())) return word;
       return word.replace(/^[a-z]/, (c) => c.toUpperCase());
     })
     .join("");
+  return { title: out, protectedWords };
 }
 
-export function fixEntries(entries: Entry[]): { entries: Entry[]; fixes: Fix[] } {
+export interface ProtectedTitle {
+  key: string;
+  words: string[];
+}
+
+export function fixEntries(entries: Entry[]): { entries: Entry[]; fixes: Fix[]; protectedTitles: ProtectedTitle[] } {
   const fixes: Fix[] = [];
+  const protectedTitles: ProtectedTitle[] = [];
   const fixed = entries.map((e) => {
     const f = { ...e.fields };
     const set = (field: Fix["field"], to: string) => {
@@ -223,7 +245,9 @@ export function fixEntries(entries: Entry[]): { entries: Entry[]; fixes: Fix[] }
       set("pages", f.pages.trim().replace(/\s*[-–—]\s*/, "--"));
     }
     if (f.title && lintEntries([{ ...e, fields: f }]).some((i) => i.rule === "uncapitalized-title")) {
-      set("title", capitalizeTitle(f.title));
+      const cap = capitalizeTitle(f.title);
+      set("title", cap.title);
+      if (cap.protectedWords.length) protectedTitles.push({ key: e.key, words: cap.protectedWords });
     }
     if (f.doi) {
       const doi = cleanDoi(f.doi);
@@ -231,5 +255,5 @@ export function fixEntries(entries: Entry[]): { entries: Entry[]; fixes: Fix[] }
     }
     return { ...e, fields: f };
   });
-  return { entries: fixed, fixes };
+  return { entries: fixed, fixes, protectedTitles };
 }

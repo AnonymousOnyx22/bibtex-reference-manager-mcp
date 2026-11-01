@@ -196,7 +196,7 @@ const fixEntriesTool: ToolDef<null> = {
   name: "fix_entries",
   title: "Fix entries",
   description:
-    "Apply the safe fixes that lint_entries points to and return the cleaned list as BibTeX: page ranges with one hyphen get a double hyphen, titles that start with a lower case letter or are all lower case get capitals (words inside braces are left alone), and DOIs written as a link or with a doi: prefix become bare DOIs. Missing fields, backwards page ranges and DOIs that are not valid are not guessed, so run lint_entries on the result. Example: pages \"12-15\" becomes \"12--15\". Your files are not changed.",
+    "Apply the safe fixes that lint_entries points to and return the cleaned list as BibTeX: page ranges with one hyphen get a double hyphen, titles that start with a lower case letter or are all lower case get capitals (words inside braces are left alone, and acronyms like DNA, NASA or iOS in those titles are wrapped as {DNA} so BibTeX keeps their case; they are listed in protected_titles), and DOIs written as a link or with a doi: prefix become bare DOIs. Missing fields, backwards page ranges and DOIs that are not valid are not guessed, so run lint_entries on the result. Example: pages \"12-15\" becomes \"12--15\". Your files are not changed.",
   inputSchema: { text, format },
   outputSchema: {
     count: z.number().describe("How many entries were read."),
@@ -210,16 +210,19 @@ const fixEntriesTool: ToolDef<null> = {
       }),
     ),
     bibtex: z.string().describe("The cleaned list as BibTeX."),
+    protected_titles: z
+      .array(z.object({ key: z.string(), words: z.array(z.string()) }))
+      .describe("Acronyms wrapped in braces, like DNA, in titles that got a capitalization fix."),
   },
   run: async (a) => {
     const { entries } = parseAny(a.text, a.format ?? "auto");
     if (!entries.length) throw new Error("No entries were found in the text, so there is nothing to fix.");
-    const { entries: cleaned, fixes } = fixEntries(entries);
+    const { entries: cleaned, fixes, protectedTitles } = fixEntries(entries);
     const bibtex = toBibtex(cleaned);
     const lines = fixes.map((f) => `${f.key}: ${f.field} "${f.from}" becomes "${f.to}"`);
     return {
       text: `Checked ${plural(entries.length, "entry")} and made ${plural(fixes.length, "change")}.\n${bullets(lines, "Nothing needed fixing.")}\n\n${bibtex}`,
-      structured: { count: entries.length, fixed: fixes.length, fixes, bibtex },
+      structured: { count: entries.length, fixed: fixes.length, fixes, bibtex, protected_titles: protectedTitles },
     };
   },
 };

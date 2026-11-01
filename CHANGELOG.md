@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `convert_bibliography` takes an optional `style` (`apa`, `mla` or `ieee`) for the plain text output, so a formatted reference list takes one call. Without it the output is the same as before.
+
 ## 0.1.1
 
 - The README now has a Common workflows section showing how the five tools work together in a typical thesis or cleaning workflow.

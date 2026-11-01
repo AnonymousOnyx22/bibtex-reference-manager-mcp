@@ -55,6 +55,16 @@ describe("convert_bibliography", () => {
     expect(data.output).toContain("Garcia, L., & World Health Organization. (2022). Remote learning outcomes.");
   });
 
+  it("writes the text output in MLA and IEEE style", async () => {
+    const mla = (await call("convert_bibliography", { text: BIBTEX, to: "text", style: "mla" })).data.output;
+    const ieee = (await call("convert_bibliography", { text: BIBTEX, to: "text", style: "ieee" })).data.output;
+    expect(mla).toContain("Smith, John, and Maria van der Berg.");
+    expect(ieee.startsWith("[1] J. Smith")).toBe(true);
+    expect(ieee).toContain("[2] ");
+    const apa = (await call("convert_bibliography", { text: BIBTEX, to: "text" })).data.output;
+    expect((await call("convert_bibliography", { text: BIBTEX, to: "text", style: "apa" })).data.output).toBe(apa);
+  });
+
   it("converts BibTeX to CSL JSON", async () => {
     const { data } = await call("convert_bibliography", { text: BIBTEX, to: "csl_json" });
     expect(JSON.parse(data.output)).toHaveLength(2);

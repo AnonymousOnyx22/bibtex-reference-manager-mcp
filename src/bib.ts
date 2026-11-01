@@ -497,9 +497,68 @@ function initials(given: string): string {
     .join(" ");
 }
 
-export function toText(entries: Entry[]): string {
+export type TextStyle = "apa" | "mla" | "ieee";
+
+function endWith(s: string): string {
+  return /[.?!]$/.test(s) ? s : `${s}.`;
+}
+
+function mlaText(e: Entry): string {
+  const f = e.fields;
+  const people = parseNames(f.author).map((n) => ({
+    first: n.literal || !n.given ? plain(n.family) : `${plain(n.family)}, ${plain(n.given)}`,
+    last: n.literal || !n.given ? plain(n.family) : `${plain(n.given)} ${plain(n.family)}`,
+  }));
+  let who = "";
+  if (people.length === 1) who = people[0].first;
+  else if (people.length === 2) who = `${people[0].first}, and ${people[1].last}`;
+  else if (people.length > 2) who = `${people[0].first}, et al`;
+  const parts: string[] = [];
+  if (who) parts.push(endWith(who));
+  const container = f.journal ?? f.booktitle;
+  if (f.title) parts.push(container ? `"${endWith(plain(f.title))}"` : endWith(plain(f.title)));
+  const bits: string[] = [];
+  if (container) bits.push(plain(container));
+  else if (f.publisher) bits.push(plain(f.publisher));
+  if (container && f.volume) bits.push(`vol. ${f.volume}`);
+  if (container && f.number) bits.push(`no. ${f.number}`);
+  if (f.year) bits.push(f.year);
+  if (container && f.pages) bits.push(`pp. ${normalizePages(f.pages).replace("--", "-")}`);
+  if (bits.length) parts.push(`${bits.join(", ")}.`);
+  if (f.doi) parts.push(`https://doi.org/${f.doi}.`);
+  else if (f.url) parts.push(`${f.url}.`);
+  return parts.join(" ");
+}
+
+function ieeeText(e: Entry, index: number): string {
+  const f = e.fields;
+  const names = parseNames(f.author).map((n) => (n.literal || !n.given ? plain(n.family) : `${initials(plain(n.given))} ${plain(n.family)}`));
+  let who = "";
+  if (names.length === 1) who = names[0];
+  else if (names.length === 2) who = `${names[0]} and ${names[1]}`;
+  else if (names.length > 2) who = `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+  const container = f.journal ?? f.booktitle;
+  const title = f.title ? plain(f.title).replace(/[.,]$/, "") : "";
+  const bits: string[] = [];
+  if (container) bits.push(plain(container));
+  else if (f.publisher) bits.push(plain(f.publisher));
+  if (container && f.volume) bits.push(`vol. ${f.volume}`);
+  if (container && f.number) bits.push(`no. ${f.number}`);
+  if (container && f.pages) bits.push(`pp. ${normalizePages(f.pages).replace("--", "-")}`);
+  if (f.year) bits.push(f.year);
+  const head = [who, container && title ? `"${title},"` : title].filter(Boolean).join(container && title ? " " : ", ");
+  let body = container && title ? `${head} ${bits.join(", ")}` : [head, bits.join(", ")].filter(Boolean).join(", ");
+  body = endWith(body.trim());
+  if (f.doi) body += ` doi: ${f.doi}.`;
+  else if (f.url) body += ` ${f.url}`;
+  return `[${index + 1}] ${body}`;
+}
+
+export function toText(entries: Entry[], style: TextStyle = "apa"): string {
   return entries
-    .map((e) => {
+    .map((e, i) => {
+      if (style === "mla") return mlaText(e);
+      if (style === "ieee") return ieeeText(e, i);
       const f = e.fields;
       const names = parseNames(f.author).map((n) => (n.literal || !n.given ? plain(n.family) : `${plain(n.family)}, ${initials(plain(n.given))}`));
       let who = "";
@@ -541,7 +600,7 @@ export function parseAny(text: string, format: Format | "auto" = "auto"): { form
   return { format: fmt, entries };
 }
 
-export function serialize(entries: Entry[], format: OutFormat): string {
+export function serialize(entries: Entry[], format: OutFormat, style: TextStyle = "apa"): string {
   switch (format) {
     case "bibtex":
       return toBibtex(entries);
@@ -550,7 +609,7 @@ export function serialize(entries: Entry[], format: OutFormat): string {
     case "csl_json":
       return toCslJson(entries);
     default:
-      return toText(entries);
+      return toText(entries, style);
   }
 }
 

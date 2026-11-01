@@ -66,7 +66,7 @@ Example result:
 Notes: leave format out unless auto picks the wrong one. If the text cannot be read, the tool returns an error asking for the format to be passed.
 
 ### convert_bibliography
-Convert between BibTeX, RIS, CSL JSON and plain text (a simple author, year, title style). Input format is detected unless passed. Page ranges become 12--15 in BibTeX. DOIs and names are cleaned on the way.
+Convert between BibTeX, RIS, CSL JSON and plain text. For plain text, pass style as apa (the default), mla or ieee to get a formatted reference list. Input format is detected unless passed. Page ranges become 12--15 in BibTeX. DOIs and names are cleaned on the way.
 
 Inputs:
 - text (required): the reference list

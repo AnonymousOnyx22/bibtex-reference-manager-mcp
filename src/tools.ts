@@ -55,11 +55,15 @@ const convertBibliography: ToolDef<null> = {
   name: "convert_bibliography",
   title: "Convert a bibliography",
   description:
-    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple author, year, title style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way. Example: text is a BibTeX entry and to is \"ris\", and output is the same reference as RIS. Set from only to override detection.",
+    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple reference list style, APA by default, or MLA or IEEE when you pass style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way. Example: text is a BibTeX entry and to is \"ris\", and output is the same reference as RIS. Set from only to override detection.",
   inputSchema: {
     text,
     to: z.enum(["bibtex", "ris", "csl_json", "text"]).describe("The format to write."),
     from: format,
+    style: z
+      .enum(["apa", "mla", "ieee"])
+      .optional()
+      .describe("The citation style for the text output: apa, mla or ieee. Defaults to apa. Ignored for the other formats."),
   },
   outputSchema: {
     from: z.string().describe("The format that was read."),
@@ -70,7 +74,7 @@ const convertBibliography: ToolDef<null> = {
   run: async (a) => {
     const { format: fmt, entries } = parseAny(a.text, a.from ?? "auto");
     if (!entries.length) throw new Error("No entries were found in the text, so there is nothing to convert.");
-    const output = serialize(entries, a.to);
+    const output = serialize(entries, a.to, a.style ?? "apa");
     return {
       text: `Converted ${plural(entries.length, "entry")} from ${fmt} to ${a.to}.\n\n${output}`,
       structured: { from: fmt, to: a.to, count: entries.length, output },

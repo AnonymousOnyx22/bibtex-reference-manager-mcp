@@ -139,7 +139,7 @@ The format is detected for you. If a file is not recognized, say which format it
 | Tool | What it does |
 | --- | --- |
 | `parse_bibliography` | Reads BibTeX, RIS or CSL JSON text and returns normalized entries: lower case field names, tidy spacing, bare DOIs, the year filled in from a date, and authors split into "Family, Given". |
-| `convert_bibliography` | Converts between BibTeX, RIS, CSL JSON and plain text. The input format is detected unless you pass `from`. Page ranges become `12--15` in BibTeX. |
+| `convert_bibliography` | Converts between BibTeX, RIS, CSL JSON and plain text. The input format is detected unless you pass `from`. Page ranges become `12--15` in BibTeX. For plain text, pass `style` as `apa` (the default), `mla` or `ieee` to get a formatted reference list. |
 | `dedupe_entries` | Finds duplicates by DOI, by the same cite key and by similar titles (the years must not clash). Says which entry to keep and returns a BibTeX list without the extra copies. |
 | `lint_entries` | Flags missing required fields, bad page ranges, uncapitalized titles, invalid DOIs, odd years and repeated keys. |
 | `generate_cite_keys` | Makes keys from the first author, the year and the first useful title word, like `smith2024deep`. Repeats get a letter, like `smith2024deepa`. |

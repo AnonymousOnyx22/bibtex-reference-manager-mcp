@@ -181,4 +181,13 @@ describe("writers", () => {
     expect(out).toContain("Journal of Machine Learning, 12(3), 45-60.");
     expect(out).toContain("https://doi.org/10.1000/abc123");
   });
+
+  it("writes journal and book entries in MLA and IEEE style", () => {
+    const mla = serialize(entries, "text", "mla");
+    expect(mla).toContain('"Deep learning for DNA sequencing." Journal of Machine Learning, vol. 12, no. 3, 2024, pp. 45-60.');
+    expect(mla).toContain("Knuth, Donald E. The TeXbook. Addison-Wesley, 1984.");
+    const ieee = serialize(entries, "text", "ieee");
+    expect(ieee).toContain('[1] J. Smith and M. van der Berg, "Deep learning for DNA sequencing," Journal of Machine Learning, vol. 12, no. 3, pp. 45-60, 2024.');
+    expect(ieee).toContain("[2] D. E. Knuth, The TeXbook, Addison-Wesley, 1984.");
+  });
 });

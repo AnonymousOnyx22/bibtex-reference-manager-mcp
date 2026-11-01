@@ -546,7 +546,7 @@ function ieeeText(e: Entry, index: number): string {
   if (container && f.number) bits.push(`no. ${f.number}`);
   if (container && f.pages) bits.push(`pp. ${normalizePages(f.pages).replace("--", "-")}`);
   if (f.year) bits.push(f.year);
-  const head = [who, container && title ? `"${title},"` : title].filter(Boolean).join(container && title ? " " : ", ");
+  const head = [who, container && title ? `"${title},"` : title].filter(Boolean).join(", ");
   let body = container && title ? `${head} ${bits.join(", ")}` : [head, bits.join(", ")].filter(Boolean).join(", ");
   body = endWith(body.trim());
   if (f.doi) body += ` doi: ${f.doi}.`;

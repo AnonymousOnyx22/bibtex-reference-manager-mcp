@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `fix_entries`, which applies the safe fixes from `lint_entries` (double hyphen page ranges, capitalized titles, bare DOIs) and returns the cleaned BibTeX with a list of each change.
+
 - `convert_bibliography` takes an optional `style` (`apa`, `mla` or `ieee`) for the plain text output, so a formatted reference list takes one call. Without it the output is the same as before.
 
 ## 0.1.1

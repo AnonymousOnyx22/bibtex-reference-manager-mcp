@@ -216,3 +216,30 @@ describe("generate_cite_keys", () => {
     expect(data.keys[0].new_key).toBe("garcia2022remote");
   });
 });
+
+describe("fix_entries", () => {
+  const messy = `
+@article{a1, author={Doe, Jane}, title={the effect of sleep on grades}, journal={J}, year={2024}, pages={50 - 55}, doi={https://doi.org/10.1000/xyz}}
+@article{a2, author={Roe, R}, title={Fine Title}, journal={J}, year={2020}, pages={9-4}, doi={not-a-doi}}
+@article{a3, author={Roe, R}, title={The effect of {DNA} on sleep}, journal={J}, year={2020}}
+`;
+
+  it("fixes pages, titles and DOIs and leaves the rest", async () => {
+    const { data } = await call("fix_entries", { text: messy });
+    expect(data.count).toBe(3);
+    const f = (k: string, field: string) => data.fixes.find((x: any) => x.key === k && x.field === field)?.to;
+    expect(f("a1", "pages")).toBe("50--55");
+    expect(f("a1", "title")).toBe("The effect of sleep on grades");
+    expect(data.bibtex).toContain("doi = {10.1000/xyz}");
+    expect(f("a2", "pages")).toBeUndefined();
+    expect(f("a2", "doi")).toBeUndefined();
+    expect(f("a3", "title")).toBeUndefined();
+    expect(data.bibtex).toContain("pages = {50--55}");
+  });
+
+  it("reports nothing to fix for a clean list", async () => {
+    const { data, text } = await call("fix_entries", { text: "@article{ok, author={Roe, R}, title={Fine Title}, journal={J}, year={2020}, pages={1--2}}" });
+    expect(data.fixed).toBe(0);
+    expect(text).toContain("Nothing needed fixing.");
+  });
+});

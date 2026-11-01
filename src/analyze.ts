@@ -188,3 +188,48 @@ export function lintEntries(entries: Entry[]): Issue[] {
   }
   return issues;
 }
+
+export interface Fix {
+  key: string;
+  field: "pages" | "title" | "doi";
+  from: string;
+  to: string;
+}
+
+function capitalizeTitle(title: string): string {
+  const raw = title.trim();
+  if (/^[a-z]/.test(raw)) return raw[0].toUpperCase() + raw.slice(1);
+  let depth = 0;
+  return raw
+    .split(/(\s+)/)
+    .map((word) => {
+      const inBraces = depth > 0 || word.startsWith("{");
+      for (const c of word) depth += c === "{" ? 1 : c === "}" ? -1 : 0;
+      if (inBraces || SMALL_WORDS.has(word.toLowerCase())) return word;
+      return word.replace(/^[a-z]/, (c) => c.toUpperCase());
+    })
+    .join("");
+}
+
+export function fixEntries(entries: Entry[]): { entries: Entry[]; fixes: Fix[] } {
+  const fixes: Fix[] = [];
+  const fixed = entries.map((e) => {
+    const f = { ...e.fields };
+    const set = (field: Fix["field"], to: string) => {
+      if (to !== f[field]) fixes.push({ key: e.key, field, from: f[field], to });
+      f[field] = to;
+    };
+    if (f.pages && pageProblem(f.pages)?.startsWith("use a double hyphen")) {
+      set("pages", f.pages.trim().replace(/\s*[-–—]\s*/, "--"));
+    }
+    if (f.title && lintEntries([{ ...e, fields: f }]).some((i) => i.rule === "uncapitalized-title")) {
+      set("title", capitalizeTitle(f.title));
+    }
+    if (f.doi) {
+      const doi = cleanDoi(f.doi);
+      if (/^10\.\d{4,9}\/\S+$/.test(doi)) set("doi", doi);
+    }
+    return { ...e, fields: f };
+  });
+  return { entries: fixed, fixes };
+}

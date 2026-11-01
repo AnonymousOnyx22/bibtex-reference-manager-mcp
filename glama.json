@@ -31,6 +31,10 @@
       "description": "Flag missing fields, bad page ranges, uncapitalized titles and invalid DOIs. Example: an article missing journal returns a missing-field issue."
     },
     {
+      "name": "fix_entries",
+      "description": "Apply the safe lint fixes and return cleaned BibTeX. Example: pages 12-15 become 12--15 and a doi.org link becomes a bare DOI."
+    },
+    {
       "name": "generate_cite_keys",
       "description": "Create consistent cite keys like smith2024deep. Example: Smith 2024 \"Deep Learning\" becomes smith2024deep with repeated keys getting letters."
     }

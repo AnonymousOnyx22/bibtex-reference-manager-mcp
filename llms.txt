@@ -130,6 +130,20 @@ Example issues:
 
 Pass the whole list so repeated keys can be found. A clean list returns no problems found.
 
+### fix_entries
+Apply the safe fixes that lint_entries points to and return the cleaned list as BibTeX, plus a list of each change (key, field, from, to).
+
+Inputs:
+- text (required): the reference list
+- format (optional): auto, bibtex, ris, or csl_json
+
+Fixes:
+- pages: a single hyphen range like 12-15 becomes 12--15
+- title: a title that starts with a lower case letter gets a capital; a title with every word in lower case gets capitals on the main words. Text inside braces is left alone
+- doi: a link or doi: prefix is removed, leaving the bare DOI
+
+Not fixed: missing fields, backwards page ranges, bad years, repeated keys and DOIs that are not valid. Run lint_entries on the result to see what is left. The list is returned as text, no file is changed.
+
 ### generate_cite_keys
 Create consistent cite keys from the first author's family name, the year, and the first meaningful word of the title. Repeated keys get a letter added.
 

@@ -14,12 +14,13 @@ async function connect() {
 }
 
 describe("the MCP server", () => {
-  it("lists the five tools, all read only and offline", async () => {
+  it("lists the six tools, all read only and offline", async () => {
     const client = await connect();
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       "convert_bibliography",
       "dedupe_entries",
+      "fix_entries",
       "generate_cite_keys",
       "lint_entries",
       "parse_bibliography",

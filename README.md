@@ -142,6 +142,7 @@ The format is detected for you. If a file is not recognized, say which format it
 | `convert_bibliography` | Converts between BibTeX, RIS, CSL JSON and plain text. The input format is detected unless you pass `from`. Page ranges become `12--15` in BibTeX. For plain text, pass `style` as `apa` (the default), `mla` or `ieee` to get a formatted reference list. |
 | `dedupe_entries` | Finds duplicates by DOI, by the same cite key and by similar titles (the years must not clash). Says which entry to keep and returns a BibTeX list without the extra copies. |
 | `lint_entries` | Flags missing required fields, bad page ranges, uncapitalized titles, invalid DOIs, odd years and repeated keys. |
+| `fix_entries` | Applies the safe fixes from `lint_entries` and returns the cleaned BibTeX: double hyphen page ranges, capitalized titles and bare DOIs. It lists each change and does not guess missing fields. |
 | `generate_cite_keys` | Makes keys from the first author, the year and the first useful title word, like `smith2024deep`. Repeats get a letter, like `smith2024deepa`. |
 
 Every tool takes the reference list as `text`, and every tool returns both a readable answer and structured fields. All of them are read only. They never change a file, because you paste the text in and get the result back.
@@ -154,7 +155,7 @@ Every tool takes the reference list as `text`, and every tool returns both a rea
 
 ## Common workflows
 
-These show how the five tools fit together. All of them take the reference list as `text` and are read only.
+These show how the six tools fit together. All of them take the reference list as `text` and are read only.
 
 ### Clean a Zotero or Mendeley export
 
@@ -173,7 +174,7 @@ These show how the five tools fit together. All of them take the reference list 
 ### Check a finished .bib before you hand it in
 
 1. Run `parse_bibliography` to normalize.
-2. Run `lint_entries` and fix what it flags.
+2. Run `lint_entries`, then `fix_entries` to apply the safe fixes it can make.
 3. Run `dedupe_entries` to make sure nothing is listed twice.
 
 ## Privacy
@@ -200,7 +201,7 @@ npm run build
 npm test
 ```
 
-The code is in `src`. `src/bib.ts` reads and writes the formats, `src/analyze.ts` finds duplicates and lint problems, and `src/tools.ts` defines the five tools.
+The code is in `src`. `src/bib.ts` reads and writes the formats, `src/analyze.ts` finds duplicates and lint problems, and `src/tools.ts` defines the six tools.
 
 ## More free student MCP servers
 

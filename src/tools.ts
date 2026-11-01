@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { bullets, type ToolDef } from "./core/tools.js";
-import { findDuplicates, lintEntries } from "./analyze.js";
+import { findDuplicates, fixEntries, lintEntries } from "./analyze.js";
 import { makeKey, parseAny, parseNames, plain, serialize, toBibtex, uniqueKey, type Entry } from "./bib.js";
 
 const text = z.string().min(1).describe("The reference list as text: BibTeX, RIS or CSL JSON.");
@@ -164,6 +164,38 @@ const lintEntriesTool: ToolDef<null> = {
   },
 };
 
+const fixEntriesTool: ToolDef<null> = {
+  name: "fix_entries",
+  title: "Fix entries",
+  description:
+    "Apply the safe fixes that lint_entries points to and return the cleaned list as BibTeX: page ranges with one hyphen get a double hyphen, titles that start with a lower case letter or are all lower case get capitals (words inside braces are left alone), and DOIs written as a link or with a doi: prefix become bare DOIs. Missing fields, backwards page ranges and DOIs that are not valid are not guessed, so run lint_entries on the result. Example: pages \"12-15\" becomes \"12--15\". Your files are not changed.",
+  inputSchema: { text, format },
+  outputSchema: {
+    count: z.number().describe("How many entries were read."),
+    fixed: z.number().describe("How many changes were made."),
+    fixes: z.array(
+      z.object({
+        key: z.string(),
+        field: z.enum(["pages", "title", "doi"]),
+        from: z.string(),
+        to: z.string(),
+      }),
+    ),
+    bibtex: z.string().describe("The cleaned list as BibTeX."),
+  },
+  run: async (a) => {
+    const { entries } = parseAny(a.text, a.format ?? "auto");
+    if (!entries.length) throw new Error("No entries were found in the text, so there is nothing to fix.");
+    const { entries: cleaned, fixes } = fixEntries(entries);
+    const bibtex = toBibtex(cleaned);
+    const lines = fixes.map((f) => `${f.key}: ${f.field} "${f.from}" becomes "${f.to}"`);
+    return {
+      text: `Checked ${plural(entries.length, "entry")} and made ${plural(fixes.length, "change")}.\n${bullets(lines, "Nothing needed fixing.")}\n\n${bibtex}`,
+      structured: { count: entries.length, fixed: fixes.length, fixes, bibtex },
+    };
+  },
+};
+
 const generateCiteKeys: ToolDef<null> = {
   name: "generate_cite_keys",
   title: "Generate cite keys",
@@ -196,4 +228,4 @@ const generateCiteKeys: ToolDef<null> = {
   },
 };
 
-export const tools: ToolDef<null>[] = [parseBibliography, convertBibliography, dedupeEntries, lintEntriesTool, generateCiteKeys];
+export const tools: ToolDef<null>[] = [parseBibliography, convertBibliography, dedupeEntries, lintEntriesTool, fixEntriesTool, generateCiteKeys];

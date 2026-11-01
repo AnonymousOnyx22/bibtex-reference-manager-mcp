@@ -105,7 +105,7 @@ export function findDuplicates(entries: Entry[], threshold: number): DuplicateGr
 export type Severity = "error" | "warning";
 export interface Issue {
   key: string;
-  rule: "missing-field" | "bad-pages" | "uncapitalized-title" | "invalid-doi" | "bad-year" | "duplicate-key";
+  rule: "missing-field" | "bad-pages" | "uncapitalized-title" | "invalid-doi" | "bad-year" | "duplicate-key" | "unescaped-character";
   severity: Severity;
   field?: string;
   message: string;
@@ -139,6 +139,18 @@ export function pageProblem(pages: string): string | null {
   }
   if (/^\d+\s*[-–—]+\s*\d+\s*[-–—]+\s*\d+$/.test(p)) return "the range has more than two page numbers";
   return `"${p}" is not a page number or a range like 12--15`;
+}
+
+const TEXT_FIELDS = ["title", "booktitle", "journal", "publisher", "series", "school", "institution", "address"];
+
+// Characters LaTeX stops on when they are not written as \&, \%, \_ or \#. Math between $ signs is skipped.
+function unescapedChars(value: string): string[] {
+  const text = value.replace(/\\\\/g, "").replace(/\$[^$]*\$/g, "");
+  const found: string[] = [];
+  for (const c of ["&", "%", "_", "#"]) {
+    if (new RegExp(`(?<!\\\\)\\${c}`).test(text)) found.push(c);
+  }
+  return found;
 }
 
 export function lintEntries(entries: Entry[]): Issue[] {
@@ -177,6 +189,15 @@ export function lintEntries(entries: Entry[]): Issue[] {
         add("uncapitalized-title", "warning", `The title starts with a lower case letter: "${plain(f.title)}".`, "title");
       } else if (words.length > 3 && words.filter((w) => !SMALL_WORDS.has(w.toLowerCase())).every((w) => w === w.toLowerCase())) {
         add("uncapitalized-title", "warning", `Every word of the title is lower case: "${plain(f.title)}".`, "title");
+      }
+    }
+
+    for (const name of TEXT_FIELDS) {
+      const value = f[name];
+      if (!value) continue;
+      const found = unescapedChars(value);
+      if (found.length) {
+        add("unescaped-character", "error", `The ${name} has ${found.map((c) => `an unescaped ${c}`).join(" and ")}. Write \\${found.join(" and \\")} so LaTeX can compile it.`, name);
       }
     }
 

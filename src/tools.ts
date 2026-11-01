@@ -163,7 +163,7 @@ const lintEntriesTool: ToolDef<null> = {
   name: "lint_entries",
   title: "Lint entries",
   description:
-    "Check a reference list for problems: missing required fields for the entry type, bad page ranges, titles that are not capitalized, invalid DOIs, odd years and repeated keys. Each issue names the entry key, the field and a plain message. Example: an @article with no journal field gives an issue with the rule missing-field and the field journal. Pass the whole list as text so repeated keys can be found.",
+    "Check a reference list for problems: missing required fields for the entry type, bad page ranges, titles that are not capitalized, invalid DOIs, odd years, repeated keys and unescaped &, %, _ or # in titles, journal names and other text fields (rule unescaped-character). Each issue names the entry key, the field and a plain message. Example: an @article with no journal field gives an issue with the rule missing-field and the field journal. Pass the whole list as text so repeated keys can be found.",
   inputSchema: { text, format },
   outputSchema: {
     count: z.number().describe("How many entries were checked."),
@@ -172,7 +172,7 @@ const lintEntriesTool: ToolDef<null> = {
     issues: z.array(
       z.object({
         key: z.string(),
-        rule: z.enum(["missing-field", "bad-pages", "uncapitalized-title", "invalid-doi", "bad-year", "duplicate-key"]),
+        rule: z.enum(["missing-field", "bad-pages", "uncapitalized-title", "invalid-doi", "bad-year", "duplicate-key", "unescaped-character"]),
         severity: z.enum(["error", "warning"]),
         field: z.string().optional(),
         message: z.string(),

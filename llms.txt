@@ -119,6 +119,7 @@ Rules:
 - invalid-doi: DOI does not look like 10.xxxx/something (DOIs are not looked up online)
 - bad-year: year is not a normal year value
 - duplicate-key: the same cite key appears more than once
+- unescaped-character: a raw &, %, _ or # in title, booktitle, journal, publisher, series, school, institution or address (text between $ signs is skipped). Write \&, \%, \_ or \# instead.
 
 Example issues:
 - bad1: missing-field on journal (error)

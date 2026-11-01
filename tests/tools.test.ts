@@ -244,6 +244,15 @@ describe("lint_entries", () => {
     expect(data.issues.filter((i: any) => i.rule === "uncapitalized-title")).toEqual([]);
   });
 
+  it("flags unescaped LaTeX characters but not escaped ones or math", async () => {
+    const text = `@article{bad, author={A, B}, title={Sleep & Memory: 50% more_data}, journal={Science # 1}, year={2020}}
+@article{ok, author={A, B}, title={Sleep \\& Memory: 50\\% more\\_data, $x_1$}, journal={Science \\#1}, year={2020}}`;
+    const { data } = await call("lint_entries", { text });
+    const found = data.issues.filter((i: any) => i.rule === "unescaped-character");
+    expect(found.map((i: any) => `${i.key}:${i.field}`)).toEqual(["bad:title", "bad:journal"]);
+    expect(found[0].message).toMatch(/&.*%.*_/);
+  });
+
   it("returns no issues when there are no entries", async () => {
     const { data } = await call("lint_entries", { text: "@comment{nothing}" });
     expect(data.issues).toEqual([]);

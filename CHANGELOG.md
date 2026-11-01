@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `lint_entries` now flags a raw `&`, `%`, `_` or `#` in titles, journal names and similar text fields, with the new rule `unescaped-character`, since these often stop a .bib file from compiling. Existing rules are unchanged.
+
 - `generate_cite_keys` takes an optional `show_bibtex`. When true, the text reply also lists the full entries with the new keys, so you can paste them into your .bib file. The existing output is unchanged.
 
 - `convert_bibliography` now accepts `chicago` and `harvard` for `style`, next to `apa`, `mla` and `ieee`. Chicago is the bibliography form with the author first. The existing styles are unchanged.

@@ -96,6 +96,10 @@ const dedupeEntries: ToolDef<null> = {
       .max(1)
       .optional()
       .describe("How alike two titles must be to count as the same, from 0.5 to 1. Defaults to 0.9."),
+    merge_duplicates: z
+      .boolean()
+      .optional()
+      .describe("Set to true to also return a merged list that shows, for each group, the fields only the removed copies had, like doi or pages. The kept entry's own fields are never changed. Defaults to false."),
   },
   outputSchema: {
     total: z.number().describe("How many entries were read."),
@@ -109,10 +113,33 @@ const dedupeEntries: ToolDef<null> = {
       }),
     ),
     deduplicated_bibtex: z.string().describe("The list as BibTeX without the removed copies."),
+    merged: z
+      .array(
+        z.object({
+          key: z.string().describe("The cite key of the kept entry."),
+          added_fields: z.record(z.string(), z.string()).describe("Fields that only the removed copies had, with the value taken from the first copy that has it."),
+          fields: z.record(z.string(), z.string()).describe("The kept entry's fields plus the added ones."),
+        }),
+      )
+      .optional()
+      .describe("Only present when merge_duplicates is true: one item per group showing the merged fields."),
   },
   run: async (a) => {
     const { entries } = parseAny(a.text, a.format ?? "auto");
     const groups = findDuplicates(entries, a.title_threshold ?? 0.9);
+    const merged = a.merge_duplicates
+      ? groups.map((g) => {
+          const fields = { ...entries[g.keepIndex].fields };
+          const added: Record<string, string> = {};
+          for (const i of g.indexes) {
+            if (i === g.keepIndex) continue;
+            for (const [name, value] of Object.entries(entries[i].fields)) {
+              if (value && !fields[name]) fields[name] = added[name] = value;
+            }
+          }
+          return { key: g.keep, added_fields: added, fields };
+        })
+      : undefined;
     const drop = new Set<number>();
     for (const g of groups) {
       for (const i of g.indexes) if (i !== g.keepIndex) drop.add(i);
@@ -126,6 +153,7 @@ const dedupeEntries: ToolDef<null> = {
         unique: kept.length,
         groups: groups.map(({ keys, reasons, keep, remove }) => ({ keys, reasons, keep, remove })),
         deduplicated_bibtex: toBibtex(kept),
+        ...(merged ? { merged } : {}),
       },
     };
   },

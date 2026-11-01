@@ -94,6 +94,7 @@ Inputs:
 - text (required): the reference list
 - format (optional): auto, bibtex, ris, or csl_json
 - title_threshold (optional): 0.5 to 1, default 0.9
+- merge_duplicates (optional): true adds a merged list. For each group it shows the fields only the removed copies had (like doi or pages) and the kept entry's fields with those added. Existing fields are never changed.
 
 How matching works:
 - DOI match: normalizes DOI (strips https://doi.org/) and matches case insensitively

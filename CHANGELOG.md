@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `dedupe_entries` takes an optional `merge_duplicates`. When true, the result has a `merged` list that shows the fields only the removed copies had (like doi or pages) next to the kept entry. The existing output is unchanged.
+
 - When the format cannot be detected, the error now lists the accepted formats with a small BibTeX, RIS and CSL JSON example, and says so when the text is only a list of DOIs or URLs.
 
 ## 0.1.2

@@ -114,6 +114,16 @@ describe("dedupe_entries", () => {
     expect(data.deduplicated_bibtex).toContain("@misc{solo,");
   });
 
+  it("shows fields that only the removed copy had when merge_duplicates is true", async () => {
+    const text = `@article{m1, title={Same Title}, year={2020}, doi={10.1/x}, pages={1--2}}\n@article{m2, title={Same Title}, year={2020}, doi={10.1/x}, journal={J}, volume={3}}`;
+    const { data } = await call("dedupe_entries", { text, merge_duplicates: true });
+    expect(data.merged).toHaveLength(1);
+    expect(data.merged[0].key).toBe("m2");
+    expect(data.merged[0].added_fields).toEqual({ pages: "1--2" });
+    expect(data.merged[0].fields.journal).toBe("J");
+    expect((await call("dedupe_entries", { text })).data.merged).toBeUndefined();
+  });
+
   it("reports no duplicates in a clean list", async () => {
     const { data, text } = await call("dedupe_entries", { text: BIBTEX });
     expect(data.groups).toEqual([]);

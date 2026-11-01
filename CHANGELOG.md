@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.2
 
 - Added `fix_entries`, which applies the safe fixes from `lint_entries` (double hyphen page ranges, capitalized titles, bare DOIs) and returns the cleaned BibTeX with a list of each change.
 

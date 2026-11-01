@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- When the format cannot be detected, the error now lists the accepted formats with a small BibTeX, RIS and CSL JSON example, and says so when the text is only a list of DOIs or URLs.
+
 ## 0.1.2
 
 - Added `fix_entries`, which applies the safe fixes from `lint_entries` (double hyphen page ranges, capitalized titles, bare DOIs) and returns the cleaned BibTeX with a list of each change.

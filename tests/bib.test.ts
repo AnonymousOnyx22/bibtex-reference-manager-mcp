@@ -30,6 +30,11 @@ describe("format detection", () => {
 
   it("rejects text it cannot place", () => {
     expect(() => detectFormat("just some words")).toThrow(/format/);
+    expect(() => detectFormat("just some words")).toThrow(/plain text[\s\S]*@article[\s\S]*TY {2}- JOUR[\s\S]*date-parts/);
+  });
+
+  it("explains a list of DOIs or URLs", () => {
+    expect(() => detectFormat("10.1000/abc123\nhttps://doi.org/10.1000/xyz")).toThrow(/list of DOIs or URLs/);
   });
 
   it("rejects empty text", () => {

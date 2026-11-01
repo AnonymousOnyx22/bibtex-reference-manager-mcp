@@ -109,7 +109,18 @@ export function detectFormat(text: string): Format {
   if (/^[\[{]/.test(t)) return "csl_json";
   if (/^TY {2}- /m.test(t)) return "ris";
   if (/@\s*\w+\s*[{(]/.test(t)) return "bibtex";
-  throw new Error("Could not tell the format. Pass format as bibtex, ris or csl_json.");
+  const looksLikeIds = t.split(/\s+/).every((w) => /^(https?:\/\/\S+|(doi:)?10\.\d{4,9}\/\S+)$/i.test(w));
+  const hint = looksLikeIds
+    ? "This looks like a list of DOIs or URLs. This server does not look them up online, so paste the reference entries instead.\n"
+    : "This looks like plain text. Paste the reference entries in one of the formats below, or pass format.\n";
+  throw new Error(
+    "Could not tell the format. " +
+      hint +
+      "Accepted formats are bibtex, ris and csl_json. Examples:\n" +
+      "bibtex:\n@article{smith2020, author = {Smith, Jane}, title = {A title}, journal = {A Journal}, year = {2020}}\n" +
+      "ris:\nTY  - JOUR\nAU  - Smith, Jane\nTI  - A title\nJO  - A Journal\nPY  - 2020\nER  - \n" +
+      'csl_json:\n[{"id":"smith2020","type":"article-journal","title":"A title","author":[{"family":"Smith","given":"Jane"}],"container-title":"A Journal","issued":{"date-parts":[[2020]]}}]',
+  );
 }
 
 /* ---------- entry normalizing ---------- */

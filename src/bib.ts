@@ -508,7 +508,7 @@ function initials(given: string): string {
     .join(" ");
 }
 
-export type TextStyle = "apa" | "mla" | "ieee";
+export type TextStyle = "apa" | "mla" | "ieee" | "chicago" | "harvard";
 
 function endWith(s: string): string {
   return /[.?!]$/.test(s) ? s : `${s}.`;
@@ -565,10 +565,70 @@ function ieeeText(e: Entry, index: number): string {
   return `[${index + 1}] ${body}`;
 }
 
+function chicagoText(e: Entry): string {
+  const f = e.fields;
+  const people = parseNames(f.author).map((n) => ({
+    first: n.literal || !n.given ? plain(n.family) : `${plain(n.family)}, ${plain(n.given)}`,
+    last: n.literal || !n.given ? plain(n.family) : `${plain(n.given)} ${plain(n.family)}`,
+  }));
+  let who = "";
+  if (people.length === 1) who = people[0].first;
+  else if (people.length > 1) {
+    const rest = people.slice(1).map((p) => p.last);
+    who = `${people[0].first}, ${rest.length > 1 ? `${rest.slice(0, -1).join(", ")}, and ${rest[rest.length - 1]}` : `and ${rest[0]}`}`;
+  }
+  const parts: string[] = [];
+  if (who) parts.push(endWith(who));
+  const container = f.journal ?? f.booktitle;
+  if (f.title) parts.push(container ? `"${endWith(plain(f.title))}"` : endWith(plain(f.title)));
+  if (container) {
+    let c = plain(container);
+    if (f.volume) c += ` ${f.volume}`;
+    if (f.number) c += `, no. ${f.number}`;
+    if (f.year) c += ` (${f.year})`;
+    if (f.pages) c += `: ${normalizePages(f.pages).replace("--", "-")}`;
+    parts.push(`${c}.`);
+  } else {
+    const pub = [f.address ? plain(f.address) : "", f.publisher ? plain(f.publisher) : ""].filter(Boolean).join(": ");
+    const tail = [pub, f.year].filter(Boolean).join(", ");
+    if (tail) parts.push(`${tail}.`);
+  }
+  if (f.doi) parts.push(`https://doi.org/${f.doi}.`);
+  else if (f.url) parts.push(`${f.url}.`);
+  return parts.join(" ");
+}
+
+function harvardText(e: Entry): string {
+  const f = e.fields;
+  const names = parseNames(f.author).map((n) => (n.literal || !n.given ? plain(n.family) : `${plain(n.family)}, ${initials(plain(n.given))}`));
+  let who = "";
+  if (names.length === 1) who = names[0];
+  else if (names.length > 1) who = `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const container = f.journal ?? f.booktitle;
+  const title = f.title ? plain(f.title).replace(/[.,]$/, "") : "";
+  let out = `${who ? `${who} ` : ""}(${f.year ?? "n.d."})`;
+  if (title) out += container ? ` '${title}',` : ` ${title}.`;
+  if (container) {
+    let c = plain(container);
+    if (f.volume) c += `, ${f.volume}`;
+    if (f.number) c += `(${f.number})`;
+    if (f.pages) c += `, pp. ${normalizePages(f.pages).replace("--", "-")}`;
+    out += ` ${c}.`;
+  } else {
+    const pub = [f.address ? plain(f.address) : "", f.publisher ? plain(f.publisher) : ""].filter(Boolean).join(": ");
+    if (pub) out += ` ${pub}.`;
+  }
+  if (f.doi) out += ` doi:${f.doi}.`;
+  else if (f.url) out += ` Available at: ${f.url}`;
+  return out;
+}
+
 export function toText(entries: Entry[], style: TextStyle = "apa"): string {
   return entries
     .map((e, i) => {
       if (style === "mla") return mlaText(e);
+      if (style === "chicago") return chicagoText(e);
+      if (style === "harvard") return harvardText(e);
       if (style === "ieee") return ieeeText(e, i);
       const f = e.fields;
       const names = parseNames(f.author).map((n) => (n.literal || !n.given ? plain(n.family) : `${plain(n.family)}, ${initials(plain(n.given))}`));

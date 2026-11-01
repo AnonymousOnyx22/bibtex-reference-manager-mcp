@@ -55,15 +55,15 @@ const convertBibliography: ToolDef<null> = {
   name: "convert_bibliography",
   title: "Convert a bibliography",
   description:
-    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple reference list style, APA by default, or MLA or IEEE when you pass style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way. Example: text is a BibTeX entry and to is \"ris\", and output is the same reference as RIS. Set from only to override detection.",
+    "Convert a reference list between BibTeX, RIS, CSL JSON and plain text (a simple reference list style, APA by default, or MLA, IEEE, Chicago or Harvard when you pass style). The input format is detected unless you pass it. Page ranges, DOIs and names are cleaned on the way. Example: text is a BibTeX entry and to is \"ris\", and output is the same reference as RIS. Set from only to override detection.",
   inputSchema: {
     text,
     to: z.enum(["bibtex", "ris", "csl_json", "text"]).describe("The format to write."),
     from: format,
     style: z
-      .enum(["apa", "mla", "ieee"])
+      .enum(["apa", "mla", "ieee", "chicago", "harvard"])
       .optional()
-      .describe("The citation style for the text output: apa, mla or ieee. Defaults to apa. Ignored for the other formats."),
+      .describe("The citation style for the text output: apa, mla, ieee, chicago or harvard. Defaults to apa. Ignored for the other formats."),
   },
   outputSchema: {
     from: z.string().describe("The format that was read."),

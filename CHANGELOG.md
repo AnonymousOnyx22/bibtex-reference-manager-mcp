@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `convert_bibliography` now accepts `chicago` and `harvard` for `style`, next to `apa`, `mla` and `ieee`. Chicago is the bibliography form with the author first. The existing styles are unchanged.
+
 - `fix_entries` now wraps acronyms like DNA, NASA and iOS in braces, as in `{DNA}`, when it fixes the capitalization of a title, so BibTeX styles keep their case. The new `protected_titles` list shows which words were wrapped. The existing output is unchanged.
 
 - `dedupe_entries` takes an optional `merge_duplicates`. When true, the result has a `merged` list that shows the fields only the removed copies had (like doi or pages) next to the kept entry. The existing output is unchanged.

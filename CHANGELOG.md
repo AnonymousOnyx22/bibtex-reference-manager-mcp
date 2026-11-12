@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3
 
 - `lint_entries` now flags a raw `&`, `%`, `_` or `#` in titles, journal names and similar text fields, with the new rule `unescaped-character`, since these often stop a .bib file from compiling. Existing rules are unchanged.
 

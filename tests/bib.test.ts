@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectFormat, parseAny, parseBibtex, parseCslJson, parseNames, parseRis, serialize, toBibtex } from "../src/bib.js";
+import { detectFormat, extractCiteKeys, parseAny, parseBibtex, parseCslJson, parseNames, parseRis, serialize, toBibtex } from "../src/bib.js";
 import { BIBTEX, CSL, RIS } from "./fixtures.js";
 
 describe("parse errors", () => {
@@ -203,5 +203,29 @@ describe("writers", () => {
     const harvard = serialize(entries, "text", "harvard");
     expect(harvard).toContain("Smith, J. and van der Berg, M. (2024) 'Deep learning for DNA sequencing', Journal of Machine Learning, 12(3), pp. 45-60.");
     expect(harvard).toContain("Knuth, D. E. (1984) The TeXbook. Addison-Wesley.");
+  });
+});
+
+describe("extractCiteKeys", () => {
+  it("finds keys in the common cite commands", () => {
+    const tex = "A \\cite{a} B \\citep{b} C \\citet{c} D \\parencite{d} E \\autocite{e}.";
+    expect(extractCiteKeys(tex)).toEqual(["a", "b", "c", "d", "e"]);
+  });
+
+  it("splits key lists and trims spaces", () => {
+    expect(extractCiteKeys("\\cite{a, b,\n c}")).toEqual(["a", "b", "c"]);
+  });
+
+  it("handles optional arguments and starred forms", () => {
+    expect(extractCiteKeys("\\citep[see][p.~4]{x} \\citet*{y} \\parencite[12]{z}")).toEqual(["x", "y", "z"]);
+  });
+
+  it("removes repeats and skips comments", () => {
+    const tex = "\\cite{a,b} again \\cite{b,c}\n% \\cite{hidden}\nText 50\\% \\cite{d}";
+    expect(extractCiteKeys(tex)).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("returns an empty list when there are no citations", () => {
+    expect(extractCiteKeys("No citations \\emph{here}.")).toEqual([]);
   });
 });

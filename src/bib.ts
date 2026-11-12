@@ -710,3 +710,28 @@ export function uniqueKey(base: string, used: Set<string>): string {
     if (!used.has(base + suffix)) return base + suffix;
   }
 }
+
+/* ---------- LaTeX citations ---------- */
+
+const CITE_COMMAND = /\\[a-zA-Z]*cite[a-zA-Z]*\*?\s*(?:\[[^\]]*\]\s*)*\{([^}]*)\}/g;
+
+/**
+ * Pulls cite keys out of \cite, \citep, \citet, \parencite, \autocite and
+ * similar commands, including lists like \cite{a,b} and optional arguments.
+ * Keys come back once each, in order of first use. Commented text is skipped.
+ */
+export function extractCiteKeys(tex: string): string[] {
+  const text = tex.replace(/(^|[^\\])%.*$/gm, "$1");
+  const seen = new Set<string>();
+  const keys: string[] = [];
+  for (const m of text.matchAll(CITE_COMMAND)) {
+    for (const raw of m[1].split(",")) {
+      const key = raw.trim();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        keys.push(key);
+      }
+    }
+  }
+  return keys;
+}
